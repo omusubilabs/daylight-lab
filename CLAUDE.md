@@ -68,8 +68,9 @@ A change is not done until all of these hold:
 
 ## Commit messages
 
-One line. No body. `.githooks/commit-msg` enforces this. Run `pnpm run prepare` once per clone to
-point git at it; pnpm 11 does not run `prepare` on install.
+One line. No body. `.githooks/commit-msg` enforces this. A `SessionStart` hook in
+`.claude/settings.json` points git at it; outside Claude Code, run `pnpm run prepare` once per
+clone, because pnpm 11 does not run `prepare` on install.
 
 If a change genuinely cannot be summarized in one line, add at most four short bullets after a
 blank line. Prose paragraphs are rejected by the hook. Trailers such as `Co-Authored-By:` are
