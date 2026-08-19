@@ -1,0 +1,16 @@
+{
+  // Assets-only Workers deployment: no "main" entry, therefore no Worker script.
+  // Static asset requests are served without invoking a Worker, which is what keeps
+  // this project's cost profile flat regardless of traffic. Adding "main" forfeits that.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "daylight-lab",
+  "compatibility_date": "2026-08-01",
+  "assets": {
+    "directory": "./dist",
+    // Single page, no client routing. A missing path should 404, not silently serve index.
+    "not_found_handling": "404-page"
+  },
+  "observability": {
+    "enabled": false
+  }
+}
