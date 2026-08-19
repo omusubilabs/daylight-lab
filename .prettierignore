@@ -3,8 +3,7 @@ node_modules/
 pnpm-lock.yaml
 test/fixtures/
 
-# Human-authored prose and the hand-commented Workers config: formatting them is churn,
-# and Prettier mangles the aligned tables in docs/ui-spec.md.
+# Hand-formatted; Prettier mangles the aligned tables in docs/ui-spec.md.
 *.md
 docs/
 wrangler.jsonc

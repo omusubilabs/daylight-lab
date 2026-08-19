@@ -1,6 +1,5 @@
 {
-  // Build tooling and node-side scripts. Kept separate so node globals stay out of
-  // src/, which must remain browser-only.
+  // Build tooling and scripts, kept out of tsconfig.json so node globals stay out of src/.
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "lib": ["ES2023"],

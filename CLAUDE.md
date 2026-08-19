@@ -65,3 +65,23 @@ A change is not done until all of these hold:
 - When a spec is ambiguous or looks physically wrong, ask in your response instead of guessing.
   The astronomy is the part where a plausible-looking wrong answer is most expensive.
 - Keep commits small and scoped to one milestone item.
+
+## Commit messages
+
+One line. No body. `.githooks/commit-msg` enforces this. Run `pnpm run prepare` once per clone to
+point git at it; pnpm 11 does not run `prepare` on install.
+
+If a change genuinely cannot be summarized in one line, add at most four short bullets after a
+blank line. Prose paragraphs are rejected by the hook. Trailers such as `Co-Authored-By:` are
+always allowed. Reasoning that does not fit belongs in the code, in `docs/`, or in the response
+to the user — not in the log.
+
+## Comments
+
+Comments explain **why**, never what. Before leaving one, reread it and delete it unless it
+answers a question the code cannot: a non-obvious constraint, a spec reference, a deliberate
+deviation. Do not narrate the build order, restate the identifier next to it, or leave a marker
+for work a milestone already tracks. A file with no comments is a good outcome.
+
+`src/lib/solar/` is the exception: every formula there cites its `docs/solar-math.md` section,
+because the derivation is not recoverable from the code.

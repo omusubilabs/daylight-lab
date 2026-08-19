@@ -1,0 +1,40 @@
+#!/bin/sh
+# Enforces the commit message rules in CLAUDE.md: one-line subject, no prose body.
+# Installed by the "prepare" script in package.json (git config core.hooksPath .githooks).
+
+msg=$(grep -v '^#' "$1")
+subject=$(printf '%s\n' "$msg" | sed -n '1p')
+
+case "$subject" in
+  Merge\ *|Revert\ *) exit 0 ;;
+esac
+
+fail() {
+  printf 'commit-msg: %s\n' "$1" >&2
+  exit 1
+}
+
+[ -n "$subject" ] || fail 'empty subject line.'
+[ "${#subject}" -le 72 ] || fail "subject is ${#subject} chars; keep it to 72 or fewer."
+
+rest=$(printf '%s\n' "$msg" | sed -n '2,$p' | tr -d '[:space:]')
+[ -n "$rest" ] || exit 0
+
+[ -z "$(printf '%s\n' "$msg" | sed -n '2p')" ] || fail 'leave a blank line after the subject.'
+
+bullets=0
+while IFS= read -r line; do
+  case "$line" in
+    '') continue ;;
+    '- '*) bullets=$((bullets + 1)) ;;
+    *:\ *)
+      key=${line%%:*}
+      case "$key" in *[!A-Za-z-]*) fail 'body must be short bullets or trailers, not prose.' ;; esac
+      ;;
+    *) fail 'body must be short bullets or trailers, not prose. Explain it in the code instead.' ;;
+  esac
+done <<BODY
+$(printf '%s\n' "$msg" | sed -n '3,$p')
+BODY
+
+[ "$bullets" -le 4 ] || fail "$bullets bullets; keep it to 4 or fewer."

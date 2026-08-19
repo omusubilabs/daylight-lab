@@ -1,7 +1,4 @@
-/*
- * Base tokens and page shell. Band colors, chart geometry and control styling arrive with
- * their milestones; every color used anywhere in the app is declared here (docs/ui-spec.md).
- */
+/* Base tokens and page shell. Every color in the app is declared here (docs/ui-spec.md). */
 :root {
   --bg: #0f172a;
   --surface: #16213c;

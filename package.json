@@ -6,6 +6,7 @@
   "description": "Drag Earth's axial tilt and watch a year of daylight rearrange itself for two cities at once.",
   "packageManager": "pnpm@11.22.0",
   "scripts": {
+    "prepare": "git config core.hooksPath .githooks",
     "dev": "vite",
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
