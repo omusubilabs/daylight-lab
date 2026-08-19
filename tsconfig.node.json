@@ -1,0 +1,10 @@
+{
+  // Build tooling and node-side scripts. Kept separate so node globals stay out of
+  // src/, which must remain browser-only.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "types": ["node"]
+  },
+  "include": ["vite.config.ts", "vitest.config.ts", "scripts"]
+}

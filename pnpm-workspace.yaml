@@ -1,0 +1,5 @@
+# pnpm 11 reads settings from here rather than from package.json.
+# Both packages ship a prebuilt native binary that their install script links into place.
+allowBuilds:
+  esbuild: true
+  workerd: true
