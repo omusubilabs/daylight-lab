@@ -1,0 +1,127 @@
+{
+  "source": "NOAA Solar Calculator — https://gml.noaa.gov/grad/solcalc/",
+  "retrieved": "2026-08-20",
+  "note": "All times UTC, as read from NOAA. Use \"alwaysAbove\" or \"alwaysBelow\" where the Sun does not cross the horizon. Read-only for Claude Code (CLAUDE.md rule 6).",
+  "cases": [
+    {
+      "city": "Tampere",
+      "date": "2026-03-20",
+      "latitudeDeg": 61.4978,
+      "longitudeDeg": 23.761,
+      "toleranceSeconds": 120,
+      "sunriseUtc": "04:27",
+      "solarNoonUtc": "10:32:33",
+      "sunsetUtc": "16:40"
+    },
+    {
+      "city": "Tampere",
+      "date": "2026-06-21",
+      "latitudeDeg": 61.4978,
+      "longitudeDeg": 23.761,
+      "toleranceSeconds": 120,
+      "sunriseUtc": "00:42",
+      "solarNoonUtc": "10:26:39",
+      "sunsetUtc": "20:12"
+    },
+    {
+      "city": "Tampere",
+      "date": "2026-09-23",
+      "latitudeDeg": 61.4978,
+      "longitudeDeg": 23.761,
+      "toleranceSeconds": 120,
+      "sunriseUtc": "04:11",
+      "solarNoonUtc": "10:17:33",
+      "sunsetUtc": "16:22"
+    },
+    {
+      "city": "Tampere",
+      "date": "2026-12-21",
+      "latitudeDeg": 61.4978,
+      "longitudeDeg": 23.761,
+      "toleranceSeconds": 120,
+      "sunriseUtc": "07:43",
+      "solarNoonUtc": "10:22:45",
+      "sunsetUtc": "13:03"
+    },
+    {
+      "city": "Niigata",
+      "date": "2026-03-20",
+      "latitudeDeg": 37.9026,
+      "longitudeDeg": 139.0236,
+      "toleranceSeconds": 60,
+      "sunriseUtc": "20:48",
+      "solarNoonUtc": "02:51:36",
+      "sunsetUtc": "08:55"
+    },
+    {
+      "city": "Niigata",
+      "date": "2026-06-21",
+      "latitudeDeg": 37.9026,
+      "longitudeDeg": 139.0236,
+      "toleranceSeconds": 60,
+      "sunriseUtc": "19:22",
+      "solarNoonUtc": "02:45:32",
+      "sunsetUtc": "10:10"
+    },
+    {
+      "city": "Niigata",
+      "date": "2026-09-23",
+      "latitudeDeg": 37.9026,
+      "longitudeDeg": 139.0236,
+      "toleranceSeconds": 60,
+      "sunriseUtc": "20:32",
+      "solarNoonUtc": "02:36:36",
+      "sunsetUtc": "08:40"
+    },
+    {
+      "city": "Niigata",
+      "date": "2026-12-21",
+      "latitudeDeg": 37.9026,
+      "longitudeDeg": 139.0236,
+      "toleranceSeconds": 60,
+      "sunriseUtc": "21:56",
+      "solarNoonUtc": "02:41:33",
+      "sunsetUtc": "07:28"
+    },
+    {
+      "city": "Singapore",
+      "date": "2026-06-21",
+      "latitudeDeg": 1.3521,
+      "longitudeDeg": 103.8198,
+      "toleranceSeconds": 60,
+      "sunriseUtc": "23:00",
+      "solarNoonUtc": "05:06:22",
+      "sunsetUtc": "11:13"
+    },
+    {
+      "city": "Singapore",
+      "date": "2026-12-21",
+      "latitudeDeg": 1.3521,
+      "longitudeDeg": 103.8198,
+      "toleranceSeconds": 60,
+      "sunriseUtc": "23:01",
+      "solarNoonUtc": "05:02:24",
+      "sunsetUtc": "11:04"
+    },
+    {
+      "city": "Sydney",
+      "date": "2026-06-21",
+      "latitudeDeg": -33.8688,
+      "longitudeDeg": 151.2093,
+      "toleranceSeconds": 60,
+      "sunriseUtc": "21:00",
+      "solarNoonUtc": "01:56:47",
+      "sunsetUtc": "06:54"
+    },
+    {
+      "city": "Sydney",
+      "date": "2026-12-21",
+      "latitudeDeg": -33.8688,
+      "longitudeDeg": 151.2093,
+      "toleranceSeconds": 60,
+      "sunriseUtc": "18:41",
+      "solarNoonUtc": "01:52:47",
+      "sunsetUtc": "09:05"
+    }
+  ]
+}
