@@ -31,7 +31,7 @@ const COLOR = {
   bg: '#0f172a',
   text: '#e8edf7',
   muted: '#9aa8c4',
-  accent: '#f4d58d',
+  sun: '#f4d58d',
   frame: '#2c3a5c',
   rule: 'rgba(232, 237, 247, 0.16)',
   overlay: '#ff5c7a',
@@ -166,7 +166,7 @@ process.stdout
 
   <text x="64" y="92" font-family="${FONT}" font-size="54" font-weight="700" letter-spacing="-1" fill="${COLOR.text}">Daylight Lab</text>
   <text x="64" y="134" font-family="${FONT}" font-size="23" fill="${COLOR.muted}">A year of daylight in Tampere, 61.5°N, against Niigata, 37.9°N.</text>
-  <text x="${FRAME.width - 64}" y="92" text-anchor="end" font-family="${MONO}" font-size="30" fill="${COLOR.accent}">23.44°</text>
+  <text x="${FRAME.width - 64}" y="92" text-anchor="end" font-family="${MONO}" font-size="30" fill="${COLOR.sun}">23.44°</text>
   <text x="${FRAME.width - 64}" y="126" text-anchor="end" font-family="${FONT}" font-size="17" fill="${COLOR.muted}">axial tilt · year 2026</text>
 
   <g>

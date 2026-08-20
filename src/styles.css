@@ -5,7 +5,11 @@
   --border: #24314f;
   --text: #e8edf7;
   --text-muted: #9aa8c4;
-  --accent: #f4d58d;
+
+  /* Warm is a control over light, cool is navigation and mode. One color meant both until the
+     split, and made neither legible (docs/design-direction.md §5.1). */
+  --sun: #f4d58d;
+  --ui-accent: #7fb2d9;
 
   /* One hue progression from night to day: the ramp reads as amount of light, not as categories
      (docs/ui-spec.md). */
@@ -20,7 +24,6 @@
   --overlay: #ff5c7a;
   /* Sits under any stroke that has to cross the whole ramp from night to daylight. */
   --stroke-halo: rgba(8, 13, 28, 0.55);
-  --cursor: #f4d58d;
 
   --page-max: 1100px;
   --gap: 1.5rem;
@@ -49,6 +52,10 @@ body {
   font-family: var(--font-sans);
   font-size: 1rem;
   line-height: 1.6;
+  /* The chart shortens as it docks, and scroll anchoring answers that by moving the scroll
+     position — which moves the mark the dock is measured from, which undocks the chart, which
+     moves the scroll back. Left on, the two flip against each other every frame. */
+  overflow-anchor: none;
 }
 
 .page {
@@ -84,7 +91,7 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--ui-accent);
   outline-offset: 2px;
 }
 
@@ -106,9 +113,29 @@ body {
 }
 
 /* Year chart (docs/ui-spec.md). Axis text lives in the frame's coordinates; only the plot is
-   stretched, by a nested svg with preserveAspectRatio="none". */
+   stretched, by a nested svg with preserveAspectRatio="none". The figure sticks to the top of the
+   viewport, so the chart is still on screen while the prose about it is read, and shortens once
+   it gets there (docs/design-direction.md §5.2).
+
+   Nothing in CSS can select a stuck element, so the dock is measured from the gap above the
+   chart: its lower edge leaves the top of the viewport at the moment the chart reaches it, and
+   its upper edge is what brings the chart back, so a scroll position on the boundary cannot flip
+   between the two. */
+.chart-dock {
+  height: 1.5rem;
+  margin-top: 0.5rem;
+}
+
 .chart {
-  margin: 2rem 0 0;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0;
+  background: var(--bg);
+}
+
+.chart--docked {
+  border-bottom: 1px solid var(--border);
 }
 
 /* A fixed pixel height, not an aspect ratio: the chart reads the box back and matches its
@@ -117,6 +144,11 @@ body {
   display: block;
   width: 100%;
   height: 420px;
+  transition: height 220ms ease;
+}
+
+.chart--docked .chart__svg {
+  height: 150px;
 }
 
 .chart__plot {
@@ -184,15 +216,30 @@ body {
   letter-spacing: 0.08em;
 }
 
+/* Collapsing a row from 1fr to 0fr is how the legend's own height is animated away without the
+   stylesheet having to know what that height is. */
 .chart-legend-wrap {
-  margin-top: 0.75rem;
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 220ms ease;
+}
+
+.chart--docked .chart-legend-wrap {
+  grid-template-rows: 0fr;
+}
+
+/* The gap above the legend is the list's own margin, not this box's padding: padding would
+   survive the zeroed row and hold the collapsed legend open. */
+.chart-legend__body {
+  min-height: 0;
+  overflow: hidden;
 }
 
 .chart-legend {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem 1.1rem;
-  margin: 0;
+  margin: 0.75rem 0 0;
   padding: 0;
   list-style: none;
   font-size: 0.875rem;
@@ -264,7 +311,6 @@ body {
 }
 
 .tilt__heading,
-.tilt__slider,
 .presets,
 .tilt__diagram {
   grid-column: 1 / -1;
@@ -287,14 +333,7 @@ body {
   font-size: clamp(2.25rem, 7vw, 3.25rem);
   font-variant-numeric: tabular-nums;
   line-height: 1.1;
-  color: var(--accent);
-}
-
-.tilt__slider {
-  width: 100%;
-  margin: 0.25rem 0 0.5rem;
-  accent-color: var(--accent);
-  cursor: pointer;
+  color: var(--sun);
 }
 
 .presets {
@@ -317,10 +356,17 @@ body {
   cursor: pointer;
 }
 
-.presets__button:hover,
+.presets__button:hover {
+  border-color: var(--sun);
+}
+
+/* The city reset sits in the preset row but changes which places are shown, not how much light
+   there is, so it takes the cool border with the other navigation controls. */
+.presets__button--cities:hover,
 .city-swap:hover,
+.city__select:hover,
 .segmented__option:hover {
-  border-color: var(--accent);
+  border-color: var(--ui-accent);
 }
 
 .presets__button--cities {
@@ -347,11 +393,11 @@ body {
 }
 
 .diagram__sun-disc {
-  fill: var(--accent);
+  fill: var(--sun);
 }
 
 .diagram__ray {
-  stroke: var(--accent);
+  stroke: var(--sun);
   stroke-width: 1.5;
   stroke-linecap: round;
 }
@@ -382,6 +428,22 @@ body {
   stroke-linecap: round;
 }
 
+/* The primary control, sat on the axis it moves (design-direction §5.6). `touch-action: none` is
+   on the grip alone, never the diagram, so the page still scrolls when a touch drag starts
+   anywhere else on it — the drag itself needs both axes, unlike the inline number's sideways-only
+   one, so `pan-y` is not an option here. */
+.diagram__grip {
+  fill: var(--sun);
+  stroke: var(--bg);
+  stroke-width: 2;
+  cursor: grab;
+  touch-action: none;
+}
+
+.diagram__grip:active {
+  cursor: grabbing;
+}
+
 .diagram__chord-halo {
   stroke: var(--band-night);
   stroke-width: 4;
@@ -394,7 +456,7 @@ body {
 }
 
 .diagram__chord--a {
-  stroke: var(--accent);
+  stroke: var(--sun);
 }
 
 .diagram__chord--b {
@@ -407,7 +469,7 @@ body {
 }
 
 .diagram__label--a {
-  fill: var(--accent);
+  fill: var(--sun);
 }
 
 .diagram__label--b {
@@ -498,9 +560,9 @@ body {
 }
 
 .segmented__option[aria-checked='true'] {
-  border-color: var(--accent);
+  border-color: var(--ui-accent);
   background: var(--surface);
-  color: var(--accent);
+  color: var(--ui-accent);
 }
 
 /* The scrub surface lies exactly on the plot rectangle; its inset comes from chart geometry. */
@@ -526,7 +588,7 @@ body {
 }
 
 .chart__cursor {
-  stroke: var(--cursor);
+  stroke: var(--ui-accent);
   stroke-width: 1.5;
   stroke-dasharray: 5 4;
 }
@@ -620,7 +682,7 @@ body {
 }
 
 a {
-  color: var(--accent);
+  color: var(--ui-accent);
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
 }
@@ -648,13 +710,87 @@ a {
   margin-bottom: 0;
 }
 
-/* A control named in the prose is set in the face the control itself uses, so "No tilt (0°)" reads
-   as a thing to press rather than as emphasis. */
-.prose b {
-  color: var(--accent);
+/* The drag affordance. A parameter of the model can be grabbed; the dashed rule under it is the
+   only thing saying so, since an inline number has no track (§5.3). */
+.prose__slider {
+  color: var(--sun);
   font-family: var(--font-mono);
   font-size: 0.9375em;
   font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  text-decoration: underline dashed;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+  cursor: ew-resize;
+  /* On the control itself, never on the paragraph (§5.3). `pan-y` rather than `none` because the
+     target is a word inside a paragraph: sideways belongs to the tilt, but a vertical swipe that
+     happens to start on the number still scrolls the page, as it would anywhere else in the text. */
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.prose__slider:hover {
+  text-decoration-style: solid;
+}
+
+/* The address affordance. A date is navigation, not a parameter of the model, so it takes the
+   cool token the scrub cursor uses rather than the tilt controls' warm one (§5.1, §5.4). */
+.prose__date {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ui-accent);
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: 0.9375em;
+  font-variant-numeric: tabular-nums;
+  text-decoration: underline dotted;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+  cursor: pointer;
+}
+
+.prose__date:hover {
+  text-decoration-style: solid;
+}
+
+/* The set affordance (§5.3, §5.5): a pill border rather than an underline, since these are the
+   same buttons as the outer preset row and the segmented control, not a word standing in for one. */
+.prose__set {
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: none;
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: 0.9375em;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+/* Warm: a named tilt is a control over light (§5.1). */
+.prose__set--tilt {
+  color: var(--sun);
+}
+
+.prose__set--tilt:hover {
+  border-color: var(--sun);
+}
+
+/* Cool: clock mode is navigation, not light, even though it shares the pill shape (§5.1). */
+.prose__set--mode {
+  color: var(--ui-accent);
+}
+
+.prose__set--mode:hover {
+  border-color: var(--ui-accent);
+}
+
+/* A result, not a control. It moves with the tilt and takes none of the control's warmth, which
+   is the distinction the whole of §5.3 rests on. */
+.prose__value {
+  font-variant-numeric: tabular-nums;
 }
 
 .methods {
@@ -716,6 +852,10 @@ a {
 @media (max-width: 700px) {
   .chart__svg {
     height: 320px;
+  }
+
+  .chart--docked .chart__svg {
+    height: 110px;
   }
 
   .tilt {

@@ -15,11 +15,13 @@ import {
 } from './state/appState.ts';
 import type { AppState } from './state/appState.ts';
 import { formatHash, parseHash } from './state/hash.ts';
+import type { ClockMode } from './lib/time/index.ts';
 import { createCityControls } from './ui/cityControls.ts';
 import { createClockToggle } from './ui/clockToggle.ts';
 import { createDataTable } from './ui/dataTable.ts';
 import { createDayReadout } from './ui/dayReadout.ts';
 import { el } from './ui/dom.ts';
+import { createInlineControls } from './ui/inlineControls.ts';
 import { createTiltControl } from './ui/tiltControl.ts';
 import { createTiltDiagram } from './ui/tiltDiagram.ts';
 
@@ -44,12 +46,27 @@ function requireCity(id: string): City {
 
 let state = parseHash(window.location.hash);
 
+/**
+ * One value, several controls: the slider and the number in the prose write it through the same
+ * path (docs/design-direction.md §5.3).
+ */
+function setTilt(tiltDeg: number): void {
+  stopAnimation();
+  apply({ ...state, tiltDeg }, 'defer', true);
+}
+
+/** A named preset, wherever it is pressed from (docs/design-direction.md §5.5). */
+function setPreset(tiltDeg: number): void {
+  animateTiltTo(tiltDeg);
+}
+
+/** A named clock mode, wherever it is pressed from (docs/design-direction.md §5.5). */
+function setClockMode(clockMode: ClockMode): void {
+  apply({ ...state, clockMode }, 'replace', false);
+}
+
 const tiltControl = createTiltControl({
-  onInput: (tiltDeg) => {
-    stopAnimation();
-    apply({ ...state, tiltDeg }, 'defer', true);
-  },
-  onPreset: (tiltDeg) => animateTiltTo(tiltDeg),
+  onPreset: setPreset,
   onCityReset: () =>
     apply(
       { ...state, cityAId: DEFAULT_STATE.cityAId, cityBId: DEFAULT_STATE.cityBId },
@@ -58,15 +75,24 @@ const tiltControl = createTiltControl({
     ),
 });
 
-const diagram = createTiltDiagram();
+const diagram = createTiltDiagram({ onInput: setTilt });
 tiltControl.diagramSlot.append(diagram.element);
+
+// The prose is already in the document, so these upgrade markup rather than build it.
+const inlineControls = createInlineControls(app, {
+  onInput: setTilt,
+  onDayPreview: previewDay,
+  onDayActivate: scrubTo,
+  onPreset: setPreset,
+  onClockMode: setClockMode,
+});
 
 const cityControls = createCityControls({
   onChange: (cityAId, cityBId) => apply({ ...state, cityAId, cityBId }, 'replace', false),
 });
 
 const clockToggle = createClockToggle({
-  onChange: (clockMode) => apply({ ...state, clockMode }, 'replace', false),
+  onChange: setClockMode,
 });
 
 const chartControls = el('div', 'chart-controls');
@@ -87,7 +113,29 @@ const chart = createYearChart({ a: seriesA, b: seriesB, dayIndex: state.dayIndex
 const dataTable = createDataTable(seriesA, seriesB);
 const readout = createDayReadout();
 
-app.append(tiltControl.element, chartControls, chart.element, dataTable.element, readout.element);
+// The prose is already in `#app`; the controls and the chart belong above it.
+const dockSentinel = el('div', 'chart-dock');
+app.prepend(
+  tiltControl.element,
+  chartControls,
+  dockSentinel,
+  chart.element,
+  dataTable.element,
+  readout.element,
+);
+
+// A stuck element is not a state CSS can select on, so the gap above the chart is watched
+// instead. The two edges of that gap are read separately: the chart docks once the gap is gone
+// from the top of the viewport and undocks once all of it is back, which leaves a band of scroll
+// positions where the state simply holds (docs/design-direction.md §5.2).
+new IntersectionObserver(
+  ([entry]) => {
+    if (!entry) return;
+    if (entry.boundingClientRect.bottom <= 0) chart.setDocked(true);
+    else if (entry.boundingClientRect.top >= 0) chart.setDocked(false);
+  },
+  { threshold: [0, 1] },
+).observe(dockSentinel);
 
 function seriesKey(sampleStep: number): string {
   return [state.tiltDeg, state.cityAId, state.cityBId, state.clockMode, sampleStep].join('|');
@@ -111,6 +159,7 @@ function draw(draft: boolean): void {
   }
 
   tiltControl.update(state.tiltDeg);
+  inlineControls.update(state.tiltDeg, state.clockMode);
   diagram.update(state.tiltDeg, cityA, cityB);
   cityControls.update(state.cityAId, state.cityBId);
   clockToggle.update(state.clockMode);
@@ -219,6 +268,12 @@ function animateTiltTo(target: number): void {
 
 function scrubTo(dayIndex: number): void {
   apply({ ...state, dayIndex: clampDayIndex(dayIndex) }, 'defer', false);
+}
+
+/** Hover/focus on a date in the prose moves the cursor without touching state (§5.4); `null`
+ * hands it back to whatever date is actually committed. */
+function previewDay(dayIndex: number | null): void {
+  chart.setCursor(dayIndex ?? state.dayIndex);
 }
 
 function scrubFromPointer(event: PointerEvent): void {

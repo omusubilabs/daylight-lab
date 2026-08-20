@@ -12,7 +12,6 @@ export const REFERENCE_YEAR = 2026;
 
 export const TILT_MIN_DEG = 0;
 export const TILT_MAX_DEG = 45;
-export const TILT_STEP_DEG = 0.01;
 
 export const DAY_COUNT = dayCountInYear(REFERENCE_YEAR);
 

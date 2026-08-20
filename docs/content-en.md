@@ -19,6 +19,12 @@ Rules:
 Every claim in the prose must be reproducible in the app itself. If the copy says the difference
 is five hours, the reader must be able to scrub to that date and see five hours.
 
+Since `docs/design-direction.md` §5.7, that includes tilts the reader has dragged to: a figure
+tied to the current tilt is written as a `data-figure` span computed by
+`src/lib/year/prose.ts`, not as a number typed into the sentence, and the brief below describes
+the sentence at the default 23.44° only. Away from it the wording itself may branch — see §5.7
+for which claims do and why.
+
 ## Required prose sections
 
 Three sections, 120–180 words each. Titles are fixed; body is yours to write within the voice
@@ -29,18 +35,27 @@ rules.
 Latitude alone does not create winter — tilt does. Walk from tilt to declination to the length
 of the Sun's arc above the horizon. End by pointing at the 0° preset.
 
+The December 21 sentence branches past ~28.5° tilt, where Tampere's December goes all the way to
+a polar night. Write both branches; do not write only the version true at 23.44°.
+
 ### 2. "Noon is not at 12:00"
 
 Two separate reasons, kept distinct: (a) time zones are political, so Niigata runs on a clock
-anchored 4° of longitude to its west; (b) the equation of time, which shifts solar noon by up to
-about 16 minutes either way over the year because Earth's orbit is elliptical and its axis is
-tilted. End by pointing at the solar-time toggle.
+anchored 4° of longitude to its west; (b) the equation of time, which shifts solar noon by an
+amount that grows with tilt — about 16 minutes either way at 23.44°, computed live, not a fixed
+figure to write in. End by pointing at the solar-time toggle.
 
 ### 3. "White nights"
 
 At Tampere on the June solstice the Sun drops only about 5° below the horizon at its lowest.
 That is shallower than the 6° civil-twilight threshold, so the sky never gets properly dark —
 without Tampere being anywhere near the Arctic Circle. Contrast with Niigata on the same night.
+
+Both claims here are tilt-dependent, not just the numbers in them. Past ~28.5° tilt Tampere's
+white nights become genuine midnight sun, and the Arctic Circle sits south of Tampere rather
+than north of it — so "not midnight sun" and "gets no midnight sun" would be false at exactly
+the tilts the slider makes reachable. Write the paragraph as a fact about the current tilt, not
+as a fact about Tampere.
 
 ## Methods note
 
