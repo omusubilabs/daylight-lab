@@ -51,6 +51,19 @@ must be distinguishable at 3px width, and the two city-B lines must be legible o
 Do not use a rainbow ramp; a single hue progression reads as "amount of light", which is the
 point. Define every color as a CSS custom property in one `:root` block.
 
+Interactive color is two tokens, and which one a thing takes is decided by what it does
+(`docs/design-direction.md` §5.1). `--sun` (`#f4d58d`) is for a control over light: the tilt
+readout, the tilt presets, the diagram's Sun and rays, city A's chord, and the controls named in
+the prose. `--ui-accent` (`#7fb2d9`) is for navigation and mode: the focus ring, links, the city
+selects and the swap and reset buttons, the clock-mode toggle, and the scrub cursor. `--overlay`
+(`#ff5c7a`) remains city B's and nothing else's.
+
+`--ui-accent` measures 7.9:1 on `--bg` and 7.0:1 on `--surface`, and at least 4.8:1 on every band
+down to nautical. It is not legible on its own over the civil (2.3:1) or day (1.8:1) bands, which
+is what `--stroke-halo` under the scrub cursor is for: the halo stripe alone reads 4.1:1 against
+the day band, and the dashes read 5.2:1 and 8.6:1 against the halo over civil and night. A change
+to either value has to keep that pair of jobs covered.
+
 ## Interaction
 
 | Control | Behavior |
