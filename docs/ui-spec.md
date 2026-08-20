@@ -21,7 +21,9 @@ Single column, max width 1100px, centered. Order top to bottom:
    shortens to 150px and drops its axis labels and legend; the scrub cursor stays
    (`docs/design-direction.md` §5.2).
 5. **Day readout** — a row of figures for the scrubbed date, city A vs city B side by side.
-6. **Explainers** — three short prose sections (see `docs/content-en.md`).
+6. **Explainers** — three short prose sections (see `docs/content-en.md`), carrying inline
+   controls. The tilt in the first section is a drag control; the two declination figures in
+   the same sentence are results, and recompute with it (`docs/design-direction.md` §5.3).
 7. **Methods & limits** — collapsible; states the simplifications from `docs/solar-math.md` §7.
 8. **Footer** — Omusubi Labs Experiments, link back to the experiments index, source link.
 
@@ -74,7 +76,8 @@ to either value has to keep that pair of jobs covered.
 
 | Control | Behavior |
 | --- | --- |
-| Tilt slider | `input` event → recompute both cities' full year → rAF-coalesced redraw. Keyboard arrows step 0.5°, Shift+arrows 0.1°, Home/End jump to 0°/45°. |
+| Tilt slider | `input` event → recompute both cities' full year → rAF-coalesced redraw. Keyboard arrows step 0.5°, Shift+arrows 0.1°, PageUp/PageDown 5°, Home/End jump to 0°/45°. |
+| Inline tilt drag | The tilt in the prose is a `role="slider"` span. A sideways drag reads as a delta from where it started, 0.1° per pixel, so the whole range is one 450px sweep. Same key map as the slider; same state, with the hash deferred until the drag settles. |
 | Preset buttons | Animate the tilt to the target over ~600ms with an ease-out, unless `prefers-reduced-motion`, in which case jump. Pushes a history entry. |
 | City selects | Native `<select>` elements, grouped by region. Swapping A and B has a dedicated swap button. |
 | Chart scrub | Pointer move / touch drag over the chart moves a vertical cursor and updates the day readout. Also focusable, with left/right arrows moving one day and PageUp/PageDown one month. |
@@ -97,6 +100,9 @@ Format times as `HH:MM` in 24-hour form with the city's zone abbreviation. Day l
 
 - The tilt slider is a real `<input type="range">` with `aria-valuetext` reading e.g.
   "23.4 degrees, Earth's actual tilt".
+- The inline tilt in the prose carries the WAI-ARIA slider pattern — `role="slider"`,
+  `tabindex="0"`, `aria-valuemin`/`max`/`now`, and the same `aria-valuetext`. It is a second
+  control over one value, not a second value, so both read alike.
 - The chart carries `role="img"` with an `aria-label` summarizing the current state, plus a
   visually hidden `<table>` of monthly sunrise/sunset values that updates with state. This is
   both the accessibility story and a free SEO surface.

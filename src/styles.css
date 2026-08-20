@@ -704,11 +704,38 @@ a {
 
 /* A control named in the prose is set in the face and the warmth of a tilt control, so
    "No tilt (0°)" reads as a thing to press rather than as emphasis (docs/design-direction.md §5.3). */
-.prose b {
+.prose b,
+.prose__slider {
   color: var(--sun);
   font-family: var(--font-mono);
   font-size: 0.9375em;
   font-weight: 400;
+}
+
+/* The drag affordance. A parameter of the model can be grabbed; the dashed rule under it is the
+   only thing saying so, since an inline number has no track (§5.3). */
+.prose__slider {
+  font-variant-numeric: tabular-nums;
+  text-decoration: underline dashed;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+  cursor: ew-resize;
+  /* On the control itself, never on the paragraph (§5.3). `pan-y` rather than `none` because the
+     target is a word inside a paragraph: sideways belongs to the tilt, but a vertical swipe that
+     happens to start on the number still scrolls the page, as it would anywhere else in the text. */
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.prose__slider:hover {
+  text-decoration-style: solid;
+}
+
+/* A result, not a control. It moves with the tilt and takes none of the control's warmth, which
+   is the distinction the whole of §5.3 rests on. */
+.prose__value {
+  font-variant-numeric: tabular-nums;
 }
 
 .methods {

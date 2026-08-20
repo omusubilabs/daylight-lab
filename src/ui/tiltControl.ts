@@ -1,24 +1,7 @@
 import { formatTilt } from '../lib/format.ts';
-import { EARTH_OBLIQUITY_DEG } from '../lib/solar/index.ts';
 import { TILT_MAX_DEG, TILT_MIN_DEG, TILT_STEP_DEG, clampTilt } from '../state/appState.ts';
 import { el } from './dom.ts';
-
-/** docs/ui-spec.md — the native step is the share link's precision, not a usable keyboard step. */
-const KEY_STEP_DEG = 0.5;
-const FINE_KEY_STEP_DEG = 0.1;
-
-export interface TiltPreset {
-  readonly label: string;
-  readonly tiltDeg: number;
-  /** Read out after the number by `aria-valuetext`, so the value has meaning without the diagram. */
-  readonly meaning: string;
-}
-
-export const TILT_PRESETS: readonly TiltPreset[] = [
-  { label: 'Earth today (23.44°)', tiltDeg: EARTH_OBLIQUITY_DEG, meaning: "Earth's actual tilt" },
-  { label: 'No tilt (0°)', tiltDeg: 0, meaning: 'no seasons anywhere' },
-  { label: 'Extreme tilt (40°)', tiltDeg: 40, meaning: 'Tampere inside the polar circle' },
-];
+import { TILT_PRESETS, tiltAfterKey, tiltValueText } from './tiltInput.ts';
 
 export interface TiltControlOptions {
   /** Fired while the slider is moving, so the chart can drop resolution until it settles. */
@@ -31,12 +14,6 @@ export interface TiltControl {
   readonly element: HTMLElement;
   readonly diagramSlot: HTMLElement;
   update(tiltDeg: number): void;
-}
-
-function valueText(tiltDeg: number): string {
-  const preset = TILT_PRESETS.find((candidate) => candidate.tiltDeg === clampTilt(tiltDeg));
-  const degrees = `${clampTilt(tiltDeg)} degrees`;
-  return preset ? `${degrees}, ${preset.meaning}` : degrees;
 }
 
 export function createTiltControl(options: TiltControlOptions): TiltControl {
@@ -81,20 +58,13 @@ export function createTiltControl(options: TiltControlOptions): TiltControl {
 
   slider.addEventListener('input', () => emit(Number(slider.value)));
 
-  // Home and End already reach 0° and 45°; the arrows would otherwise step by the 0.01° share
-  // precision, which is 4500 presses from end to end (docs/ui-spec.md).
+  // The native arrows would step by the 0.01° share precision, which is 4500 presses from end to
+  // end, so the whole key map is taken over rather than patched (docs/ui-spec.md).
   slider.addEventListener('keydown', (event) => {
-    const direction =
-      event.key === 'ArrowRight' || event.key === 'ArrowUp'
-        ? 1
-        : event.key === 'ArrowLeft' || event.key === 'ArrowDown'
-          ? -1
-          : 0;
-    if (direction === 0 || event.altKey || event.ctrlKey || event.metaKey) return;
-
+    const next = tiltAfterKey(current, event);
+    if (next === null) return;
     event.preventDefault();
-    const step = event.shiftKey ? FINE_KEY_STEP_DEG : KEY_STEP_DEG;
-    emit(current + direction * step);
+    emit(next);
   });
 
   const element = el('section', 'tilt');
@@ -104,7 +74,7 @@ export function createTiltControl(options: TiltControlOptions): TiltControl {
     const tilt = clampTilt(tiltDeg);
     current = tilt;
     if (Number(slider.value) !== tilt) slider.value = String(tilt);
-    slider.setAttribute('aria-valuetext', valueText(tilt));
+    slider.setAttribute('aria-valuetext', tiltValueText(tilt));
     value.textContent = formatTilt(tilt);
   };
 

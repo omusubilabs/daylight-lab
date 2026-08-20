@@ -20,6 +20,7 @@ import { createClockToggle } from './ui/clockToggle.ts';
 import { createDataTable } from './ui/dataTable.ts';
 import { createDayReadout } from './ui/dayReadout.ts';
 import { el } from './ui/dom.ts';
+import { createInlineControls } from './ui/inlineControls.ts';
 import { createTiltControl } from './ui/tiltControl.ts';
 import { createTiltDiagram } from './ui/tiltDiagram.ts';
 
@@ -44,11 +45,17 @@ function requireCity(id: string): City {
 
 let state = parseHash(window.location.hash);
 
+/**
+ * One value, several controls: the slider and the number in the prose write it through the same
+ * path (docs/design-direction.md §5.3).
+ */
+function setTilt(tiltDeg: number): void {
+  stopAnimation();
+  apply({ ...state, tiltDeg }, 'defer', true);
+}
+
 const tiltControl = createTiltControl({
-  onInput: (tiltDeg) => {
-    stopAnimation();
-    apply({ ...state, tiltDeg }, 'defer', true);
-  },
+  onInput: setTilt,
   onPreset: (tiltDeg) => animateTiltTo(tiltDeg),
   onCityReset: () =>
     apply(
@@ -60,6 +67,9 @@ const tiltControl = createTiltControl({
 
 const diagram = createTiltDiagram();
 tiltControl.diagramSlot.append(diagram.element);
+
+// The prose is already in the document, so these upgrade markup rather than build it.
+const inlineControls = createInlineControls(app, { onInput: setTilt });
 
 const cityControls = createCityControls({
   onChange: (cityAId, cityBId) => apply({ ...state, cityAId, cityBId }, 'replace', false),
@@ -133,6 +143,7 @@ function draw(draft: boolean): void {
   }
 
   tiltControl.update(state.tiltDeg);
+  inlineControls.update(state.tiltDeg);
   diagram.update(state.tiltDeg, cityA, cityB);
   cityControls.update(state.cityAId, state.cityBId);
   clockToggle.update(state.clockMode);
