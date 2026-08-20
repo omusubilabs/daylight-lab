@@ -732,6 +732,27 @@ a {
   text-decoration-style: solid;
 }
 
+/* The address affordance. A date is navigation, not a parameter of the model, so it takes the
+   cool token the scrub cursor uses rather than the tilt controls' warm one (§5.1, §5.4). */
+.prose__date {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ui-accent);
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: 0.9375em;
+  font-variant-numeric: tabular-nums;
+  text-decoration: underline dotted;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+  cursor: pointer;
+}
+
+.prose__date:hover {
+  text-decoration-style: solid;
+}
+
 /* A result, not a control. It moves with the tilt and takes none of the control's warmth, which
    is the distinction the whole of §5.3 rests on. */
 .prose__value {

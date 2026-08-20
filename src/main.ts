@@ -69,7 +69,11 @@ const diagram = createTiltDiagram();
 tiltControl.diagramSlot.append(diagram.element);
 
 // The prose is already in the document, so these upgrade markup rather than build it.
-const inlineControls = createInlineControls(app, { onInput: setTilt });
+const inlineControls = createInlineControls(app, {
+  onInput: setTilt,
+  onDayPreview: previewDay,
+  onDayActivate: scrubTo,
+});
 
 const cityControls = createCityControls({
   onChange: (cityAId, cityBId) => apply({ ...state, cityAId, cityBId }, 'replace', false),
@@ -252,6 +256,12 @@ function animateTiltTo(target: number): void {
 
 function scrubTo(dayIndex: number): void {
   apply({ ...state, dayIndex: clampDayIndex(dayIndex) }, 'defer', false);
+}
+
+/** Hover/focus on a date in the prose moves the cursor without touching state (§5.4); `null`
+ * hands it back to whatever date is actually committed. */
+function previewDay(dayIndex: number | null): void {
+  chart.setCursor(dayIndex ?? state.dayIndex);
 }
 
 function scrubFromPointer(event: PointerEvent): void {

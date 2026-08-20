@@ -6,6 +6,7 @@
  * Nothing here holds state. The drag and the range input are two controls over one `AppState`.
  */
 import { formatTilt } from '../lib/format.ts';
+import { dayIndexFromDate } from '../lib/year/index.ts';
 import { computeReactiveProse } from '../lib/year/prose.ts';
 import type { ReactiveProse } from '../lib/year/prose.ts';
 import type { ClockMode } from '../lib/time/index.ts';
@@ -15,6 +16,10 @@ import { tiltAfterDrag, tiltAfterKey, tiltValueText } from './tiltInput.ts';
 export interface InlineControlsOptions {
   /** Fired while the number is being dragged, so the chart can drop resolution until it settles. */
   onInput(tiltDeg: number): void;
+  /** Hover or focus on a date button; `null` when it ends, to hand the cursor back to `state`. */
+  onDayPreview(dayIndex: number | null): void;
+  /** Click or keyboard-activate a date button (docs/design-direction.md §5.4). */
+  onDayActivate(dayIndex: number): void;
 }
 
 export interface InlineControls {
@@ -31,6 +36,7 @@ export function createInlineControls(
   options: InlineControlsOptions,
 ): InlineControls {
   const sliders = [...root.querySelectorAll<HTMLElement>('[data-control="tilt"]')];
+  const dateButtons = [...root.querySelectorAll<HTMLButtonElement>('[data-control="date"]')];
   const declinations = [...root.querySelectorAll<HTMLElement>('[data-figure="declination"]')];
   // §5.7: everything else in the prose that recomputes with the tilt, keyed by `data-figure` to
   // the matching property of `ReactiveProse` — one lookup covers a single span and a whole clause
@@ -90,6 +96,21 @@ export function createInlineControls(
       event.preventDefault();
       emit(next);
     });
+  }
+
+  // An address, not a slider: the day it names never moves, so a native <button> gets keyboard
+  // and touch activation for free and only the affordance class is added here (§5.3, §5.4).
+  for (const button of dateButtons) {
+    button.classList.add('prose__date');
+    const month = Number(button.dataset.month);
+    const day = Number(button.dataset.day);
+    const dayIndex = dayIndexFromDate(REFERENCE_YEAR, month, day) ?? 0;
+
+    button.addEventListener('mouseenter', () => options.onDayPreview(dayIndex));
+    button.addEventListener('mouseleave', () => options.onDayPreview(null));
+    button.addEventListener('focus', () => options.onDayPreview(dayIndex));
+    button.addEventListener('blur', () => options.onDayPreview(null));
+    button.addEventListener('click', () => options.onDayActivate(dayIndex));
   }
 
   for (const declination of declinations) declination.classList.add('prose__value');

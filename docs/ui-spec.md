@@ -23,7 +23,10 @@ Single column, max width 1100px, centered. Order top to bottom:
 5. **Day readout** — a row of figures for the scrubbed date, city A vs city B side by side.
 6. **Explainers** — three short prose sections (see `docs/content-en.md`), carrying inline
    controls. The tilt in the first section is a drag control; the two declination figures in
-   the same sentence are results, and recompute with it (`docs/design-direction.md` §5.3).
+   the same sentence are results, and recompute with it (`docs/design-direction.md` §5.3). The
+   dates named in the first and third sections — "December 21", "June 21" — are address controls:
+   hovering or focusing one previews that column in the chart, activating it scrubs to that date
+   (`docs/design-direction.md` §5.4).
 7. **Methods & limits** — collapsible; states the simplifications from `docs/solar-math.md` §7.
 8. **Footer** — Omusubi Labs Experiments, link back to the experiments index, source link.
 
@@ -63,7 +66,8 @@ Interactive color is two tokens, and which one a thing takes is decided by what 
 (`docs/design-direction.md` §5.1). `--sun` (`#f4d58d`) is for a control over light: the tilt
 readout, the tilt presets, the diagram's Sun and rays, city A's chord, and the controls named in
 the prose. `--ui-accent` (`#7fb2d9`) is for navigation and mode: the focus ring, links, the city
-selects and the swap and reset buttons, the clock-mode toggle, and the scrub cursor. `--overlay`
+selects and the swap and reset buttons, the clock-mode toggle, the scrub cursor, and the date
+controls in the prose. `--overlay`
 (`#ff5c7a`) remains city B's and nothing else's.
 
 `--ui-accent` measures 7.9:1 on `--bg` and 7.0:1 on `--surface`, and at least 4.8:1 on every band
@@ -78,6 +82,7 @@ to either value has to keep that pair of jobs covered.
 | --- | --- |
 | Tilt slider | `input` event → recompute both cities' full year → rAF-coalesced redraw. Keyboard arrows step 0.5°, Shift+arrows 0.1°, PageUp/PageDown 5°, Home/End jump to 0°/45°. |
 | Inline tilt drag | The tilt in the prose is a `role="slider"` span. A sideways drag reads as a delta from where it started, 0.1° per pixel, so the whole range is one 450px sweep. Same key map as the slider; same state, with the hash deferred until the drag settles. |
+| Inline date address | Dates named in the prose are native `<button>`s. Hover or focus moves the chart's cursor to that date without touching state; click or keyboard-activate scrubs to it, same as the chart's own scrub, with the hash deferred. |
 | Preset buttons | Animate the tilt to the target over ~600ms with an ease-out, unless `prefers-reduced-motion`, in which case jump. Pushes a history entry. |
 | City selects | Native `<select>` elements, grouped by region. Swapping A and B has a dedicated swap button. |
 | Chart scrub | Pointer move / touch drag over the chart moves a vertical cursor and updates the day readout. Also focusable, with left/right arrows moving one day and PageUp/PageDown one month. |
