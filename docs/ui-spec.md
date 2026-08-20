@@ -3,6 +3,9 @@
 Plain DOM + TypeScript. No framework, no CSS framework, no icon library, no web fonts
 (system font stack only). One page, no routing.
 
+`docs/design-direction.md` sets the interaction model and amends the sections listed in its §8.
+Where the two disagree the direction wins; this file is amended as each of its items ships.
+
 ## Layout
 
 Single column, max width 1100px, centered. Order top to bottom:

@@ -27,6 +27,7 @@ docs/
   product-spec.md                  what this is, what it deliberately is not
   solar-math.md                    the algorithm, verbatim. authoritative.
   ui-spec.md                       layout, chart geometry, interaction, a11y
+  design-direction.md              the interaction model and why. amends ui-spec.md
   content-en.md                    English voice rules and required copy
   milestones.md                    build order with acceptance criteria
 .claude/skills/solar-verify/       verification procedure for the astronomy layer

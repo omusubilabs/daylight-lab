@@ -10,7 +10,7 @@ Default comparison: **Tampere (61.5°N)** vs **Niigata (37.9°N)**.
 | When | Read |
 | --- | --- |
 | Any change to `src/lib/solar/**` | `docs/solar-math.md` (mandatory — do not derive the formulas yourself) |
-| Any change to UI / layout / chart | `docs/ui-spec.md` |
+| Any change to UI / layout / chart | `docs/design-direction.md`, then `docs/ui-spec.md` (the direction wins) |
 | Any user-facing English text | `docs/content-en.md` |
 | Deciding scope, or tempted to add a feature | `docs/product-spec.md` (see Non-goals) |
 | Picking what to build next | `docs/milestones.md` |
