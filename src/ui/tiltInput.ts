@@ -1,8 +1,10 @@
 /**
- * Gesture arithmetic shared by every control over the tilt: the range input, and the inline number
- * in the prose (docs/design-direction.md §5.3). No DOM here, so the key map is one testable thing
- * rather than a rule each control restates and then drifts from.
+ * Gesture arithmetic shared by every control over the tilt: the diagram grip, the inline number in
+ * the prose, and (until §5.6) the range input (docs/design-direction.md §5.3). No DOM here, so the
+ * key map is one testable thing rather than a rule each control restates and then drifts from.
  */
+import { DIAGRAM } from '../chart/diagramGeometry.ts';
+import type { Point } from '../chart/diagramGeometry.ts';
 import { EARTH_OBLIQUITY_DEG } from '../lib/solar/index.ts';
 import { TILT_MAX_DEG, TILT_MIN_DEG, clampTilt } from '../state/appState.ts';
 
@@ -73,4 +75,22 @@ export function tiltAfterKey(currentDeg: number, event: TiltKeyEvent): number | 
 
 export function tiltAfterDrag(startDeg: number, deltaXPx: number): number {
   return clampTilt(startDeg + deltaXPx * DEG_PER_PIXEL);
+}
+
+/**
+ * The grip stands for the axis itself, so it reads as an absolute angle rather than a delta
+ * (design-direction §5.6) — wherever the pointer lands, in the diagram's own SVG coordinates, is
+ * where the axis points. `onEarth` in `diagramGeometry.ts` places the north pole at
+ * `90 + tiltDeg` degrees, measured counterclockwise from due east with screen y flipped; this is
+ * its inverse.
+ */
+export function tiltFromGripPoint(point: Point): number {
+  const dx = point.x - DIAGRAM.earth.cx;
+  // `DIAGRAM.earth.cy - point.y` rather than `-(point.y - DIAGRAM.earth.cy)`: on the horizontal
+  // through the centre the two are mathematically equal but not the same float — negating a zero
+  // difference yields -0, and `atan2(-0, negative dx)` returns -180° instead of +180°, wrapping a
+  // grip dragged due left to 0° instead of clamping it at 45°.
+  const dy = DIAGRAM.earth.cy - point.y;
+  const angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI;
+  return clampTilt(angleDeg - 90);
 }

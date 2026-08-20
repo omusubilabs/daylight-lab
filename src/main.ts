@@ -66,7 +66,6 @@ function setClockMode(clockMode: ClockMode): void {
 }
 
 const tiltControl = createTiltControl({
-  onInput: setTilt,
   onPreset: setPreset,
   onCityReset: () =>
     apply(
@@ -76,7 +75,7 @@ const tiltControl = createTiltControl({
     ),
 });
 
-const diagram = createTiltDiagram();
+const diagram = createTiltDiagram({ onInput: setTilt });
 tiltControl.diagramSlot.append(diagram.element);
 
 // The prose is already in the document, so these upgrade markup rather than build it.

@@ -11,11 +11,12 @@ Where the two disagree the direction wins; this file is amended as each of its i
 Single column, max width 1100px, centered. Order top to bottom:
 
 1. **Header** — title, one-sentence subtitle, reference year badge ("Year 2026").
-2. **Tilt control** — the primary control, visually dominant. Large range input, current value in
-   a big readout, three preset buttons underneath.
+2. **Tilt control** — the primary control, visually dominant. Current value in a big readout,
+   three preset buttons underneath. The diagram (below) is the control; there is no range input.
 3. **Tilt diagram** — small inline SVG (~220×160): the Sun, Earth's orbit plane, and the axis
-   drawn at the current tilt, with the two cities' latitudes marked as ticks. Redraws live with
-   the slider. This is the causal bridge between the abstract number and the chart.
+   drawn at the current tilt, with the two cities' latitudes marked as ticks. A grip on the axis
+   is the primary control — dragging it sets the tilt, clamped to 0–45° — so it is sized and
+   placed accordingly rather than as an illustration (`docs/design-direction.md` §5.6).
 4. **Year chart** — the main artifact. Full width, ~420px tall on desktop, and sticky at the top
    of the viewport so that it is still on screen while the prose discussing it is read. Docked, it
    shortens to 150px and drops its axis labels and legend; the scrub cursor stays
@@ -66,7 +67,7 @@ point. Define every color as a CSS custom property in one `:root` block.
 
 Interactive color is two tokens, and which one a thing takes is decided by what it does
 (`docs/design-direction.md` §5.1). `--sun` (`#f4d58d`) is for a control over light: the tilt
-readout, the tilt presets, the diagram's Sun and rays, city A's chord, and the tilt controls named
+readout, the tilt presets, the diagram's Sun and rays, its grip, city A's chord, and the tilt controls named
 in the prose. `--ui-accent` (`#7fb2d9`) is for navigation and mode: the focus ring, links, the city
 selects and the swap and reset buttons, the clock-mode toggle, the scrub cursor, and the date and
 clock-mode controls in the prose. `--overlay`
@@ -82,7 +83,7 @@ to either value has to keep that pair of jobs covered.
 
 | Control | Behavior |
 | --- | --- |
-| Tilt slider | `input` event → recompute both cities' full year → rAF-coalesced redraw. Keyboard arrows step 0.5°, Shift+arrows 0.1°, PageUp/PageDown 5°, Home/End jump to 0°/45°. |
+| Tilt diagram grip | Pointer drag on the diagram's axis reads as an absolute angle from Earth's centre, clamped to 0–45° → recompute both cities' full year → rAF-coalesced redraw. Keyboard arrows step 0.5°, Shift+arrows 0.1°, PageUp/PageDown 5°, Home/End jump to 0°/45° (`docs/design-direction.md` §5.6). |
 | Inline tilt drag | The tilt in the prose is a `role="slider"` span. A sideways drag reads as a delta from where it started, 0.1° per pixel, so the whole range is one 450px sweep. Same key map as the slider; same state, with the hash deferred until the drag settles. |
 | Inline date address | Dates named in the prose are native `<button>`s. Hover or focus moves the chart's cursor to that date without touching state; click or keyboard-activate scrubs to it, same as the chart's own scrub, with the hash deferred. |
 | Inline set | "No tilt (0°)" and "Solar time" in the prose are native `<button>`s that call the same handlers as the tilt-control presets and the clock-mode toggle — no separate state, no new computation (`docs/design-direction.md` §5.5). |
@@ -106,11 +107,14 @@ Format times as `HH:MM` in 24-hour form with the city's zone abbreviation. Day l
 
 ## Accessibility
 
-- The tilt slider is a real `<input type="range">` with `aria-valuetext` reading e.g.
-  "23.4 degrees, Earth's actual tilt".
-- The inline tilt in the prose carries the WAI-ARIA slider pattern — `role="slider"`,
-  `tabindex="0"`, `aria-valuemin`/`max`/`now`, and the same `aria-valuetext`. It is a second
-  control over one value, not a second value, so both read alike.
+- The tilt diagram's grip carries the WAI-ARIA slider pattern — `role="slider"`, `tabindex="0"`,
+  `aria-valuemin`/`max`/`now`/`text`, and a visible focus ring — with `aria-valuetext` reading e.g.
+  "23.44 degrees, Earth's actual tilt". It is a sibling of the diagram's `role="img"` picture, not
+  a descendant, since an image role is not meant to have a focusable descendant
+  (`docs/design-direction.md` §5.6).
+- The inline tilt in the prose carries the same WAI-ARIA slider pattern — `role="slider"`,
+  `tabindex="0"`, `aria-valuemin`/`max`/`now`, and the same `aria-valuetext`. It is a third
+  control over one value, not a second value, so all three read alike.
 - The chart carries `role="img"` with an `aria-label` summarizing the current state, plus a
   visually hidden `<table>` of monthly sunrise/sunset values that updates with state. This is
   both the accessibility story and a free SEO surface.

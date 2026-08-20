@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
+import { DIAGRAM, axisSegment } from '../src/chart/diagramGeometry.ts';
 import { TILT_MAX_DEG, TILT_MIN_DEG } from '../src/state/appState.ts';
-import { tiltAfterDrag, tiltAfterKey, tiltValueText } from '../src/ui/tiltInput.ts';
+import {
+  tiltAfterDrag,
+  tiltAfterKey,
+  tiltFromGripPoint,
+  tiltValueText,
+} from '../src/ui/tiltInput.ts';
 
 describe('tilt key map', () => {
   it('steps 0.5° on the arrows and 0.1° with shift', () => {
@@ -50,6 +56,28 @@ describe('tilt drag', () => {
   it('keeps the share link precision, so a drag cannot leak a float into the hash', () => {
     expect(tiltAfterDrag(23.44, 1)).toBe(23.54);
     expect(tiltAfterDrag(23.44, 7)).toBe(24.14);
+  });
+});
+
+describe('tilt from grip point', () => {
+  const { cx, cy } = DIAGRAM.earth;
+
+  it('inverts axisSegment: the point the axis actually draws maps back to the tilt that drew it', () => {
+    for (const tiltDeg of [0, 5.5, 23.44, 40, TILT_MAX_DEG]) {
+      expect(tiltFromGripPoint(axisSegment(tiltDeg).from)).toBe(tiltDeg);
+    }
+  });
+
+  it('reads straight up as 0°, and left of vertical as a positive tilt', () => {
+    expect(tiltFromGripPoint({ x: cx, y: cy - 50 })).toBe(TILT_MIN_DEG);
+    const offset = 50 / Math.SQRT2;
+    expect(tiltFromGripPoint({ x: cx - offset, y: cy - offset })).toBe(TILT_MAX_DEG);
+  });
+
+  it('clamps rather than wrapping once the pointer passes either end of the range', () => {
+    expect(tiltFromGripPoint({ x: cx - 50, y: cy })).toBe(TILT_MAX_DEG);
+    expect(tiltFromGripPoint({ x: cx + 50, y: cy })).toBe(TILT_MIN_DEG);
+    expect(tiltFromGripPoint({ x: cx, y: cy + 50 })).toBe(TILT_MIN_DEG);
   });
 });
 
