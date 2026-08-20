@@ -135,6 +135,87 @@ The tilt diagram gets a grip on the axis; dragging it sets the tilt, clamped to 
   a replacement. Do not "keep" the input by hiding it visually — a focusable element with no visible
   focus is worse than either option.
 
+### 5.7 The prose keeps up with the state
+
+§5.3 decided which numbers become controls. This decides which of the rest move, and §5.3 is what
+made it urgent: the tilt is now scrubbed continuously from inside the sentence that quotes its
+consequences. It moves the first test in §2 — the effect of the gesture is the sentence being read
+— and it is the only item here that is also a correctness fix.
+
+**The rule, extending §5.3's.** A figure moves when it is a result of the current state. A figure
+stays when the sentence names the state it describes. "Press **No tilt (0°)** ... Tampere then gets
+12h 14m" is about 0°, wherever the tilt actually is; wiring it would break it in the other
+direction.
+
+Measured 2026-08-20 against `src/lib/solar/`: every figure in the copy is correct at the default
+state. What follows is what happens away from it.
+
+#### Figures that move
+
+| Where | Today | At 0° | At 40° |
+| --- | --- | --- | --- |
+| §1 ¶3, December 21 at Tampere | 09:42, 5.1°, 15:03, 5h 21m | 06:16, 28.5°, 18:30, 12h 14m | polar night, -11.5°, 0h 00m |
+| §2 ¶2, Tampere's solar noon | 12:23 | 12:23 | 12:22 |
+| §2 ¶3, the equation of time | "about a quarter of an hour" | 7.7 min | 37.2 min |
+| §2 ¶3, Niigata's solar noon | 11:27 to 11:58 | 11:36 to 11:51 | 11:06 to 12:18 |
+| §3 ¶1, June 21 at Tampere | 23:11, 03:41, 5.1° below | 19:33, 07:19, 28.5° below | midnight sun, 11.5° above |
+| §3 ¶2, the white-night run | June 5 to July 7, 33 nights | none | April 27 to August 15, 111 nights |
+| §3 ¶3, the polar circle | 5°, 66.6°N, 560 km | 90.0°N | 50.0°N, Tampere 11.5° inside |
+| §3 ¶4, Niigata's lowest Sun | 28.7° below | 52.1° below | 12.1° below |
+
+Solar time moves 09:42/15:03 to 09:20/14:40 and 23:11/03:41 to 21:45/02:15. It does not move a day
+length. The dates the copy names — December 21, June 21 — are addresses, not readings, and stay
+fixed however the chart is scrubbed (§5.4).
+
+#### Claims that invert
+
+Three sentences flip their truth value, and no substituted number saves them:
+
+1. "not midnight sun, but a night that never finishes darkening" — past the tipping point it is
+   exactly midnight sun.
+2. "None of this needs the Arctic Circle ... Tampere gets no midnight sun on any date of the year."
+3. "The Sun sets at 23:11 and rises again at 03:41 ... In between it does not go far down" — at 40°
+   it neither sets nor rises.
+
+The tipping point is **28.5°**, which is `90 - 61.4978` and nothing else. It is inside the range,
+one drag from the default, and 40° is a labelled preset whose own `meaning` string reads "Tampere
+inside the polar circle". The product already argues with its own copy; §5.3 only made it
+continuous.
+
+The two halves are different work:
+
+- **Figures** reuse `Reading` from `src/lib/year/readings.ts`, which already renders "Midnight sun"
+  and "Polar night" where a time will not do. No new idea, one more caller.
+- **Claims** are rewritten to hold at every tilt, anchored to where the polar circle currently is
+  rather than to a fact about Tampere that stops being one at 28.5°.
+
+This also amends `docs/content-en.md`: the brief for prose section 3 specifies the claim itself
+("without Tampere being anywhere near the Arctic Circle"), so the brief moves with the copy.
+
+#### What must not move
+
+- The conditional sentences — §1 ¶4's "Press **No tilt (0°)** ... 12h 14m" and §2 ¶4's "Switch ...
+  to **Solar time** ... exactly 12:00". Both describe a state the reader is being sent to.
+- 6° for civil twilight, 0.833° for refraction, 2026 for the reference year.
+- Both 23.44° in the methods note. That is Earth's obliquity as a fixed reference, not the tilt.
+- The methods note's worked examples — 7 minutes at the equator, 14 at Tampere, 19 at Tromsø. They
+  are chosen illustrations, not city A.
+
+#### City names stay fixed
+
+"Tampere sits at 61.5°N", "Japan runs on one time zone, anchored to 135°E", "Niigata is at
+139.0°E", "a zone anchored to 30°E". None of these follow the city selectors, and §2 is the reason:
+it is built on Japan's and Finland's specific anchors, so substituting numbers yields "Singapore
+runs on one time zone, anchored to 135°E". Rewriting the subject of a sentence is copy generation,
+not a readout, and `docs/content-en.md` writes these three sections about these two cities on
+purpose. The "Tampere vs Niigata" reset is the way back, and it already exists.
+
+#### Order
+
+Last in the list, but not least urgent: it depends on none of §5.4–§5.6 and can be taken whenever.
+Within it, §1 ¶3 comes first — it is the sentence directly under the new control — then §3, which
+holds the three inverting claims, then §2.
+
 ## 6. What does not change
 
 - `src/lib/solar/` is untouched. This is a presentation change. No fixture moves, for any reason.
@@ -147,7 +228,9 @@ The tilt diagram gets a grip on the axis; dragging it sets the tilt, clamped to 
 
 Measured on 2026-08-20: JS 11.4 KB gzipped against a 60 KB ceiling, CSS 2.6 KB against 15 KB. The
 six items above are expected to add under 2 KB gzipped in total. Measure after each one. If a single
-item costs more than a kilobyte, stop and report it rather than shipping it.
+item costs more than a kilobyte, stop and report it rather than shipping it. §5.7 was added after
+that estimate and is not inside it: it is roughly twenty figures plus phrase handling, so measure
+it on its own and expect it to be the largest of them.
 
 ## 8. Amendments to `docs/ui-spec.md`
 
@@ -160,6 +243,7 @@ exists.
 | Layout 3, Tilt diagram | Primary control, not an illustration. Sized and placed accordingly. |
 | Layout 4, Year chart | Sticky; shortens to 150px / 110px when docked. |
 | Layout 6, Explainers | Carry inline controls. See §5.3. |
+| Layout 6, Explainers | Their figures track the state, and three claims are rewritten to hold at any tilt. See §5.7. |
 | Colors | `--accent` splits into `--sun` and `--ui-accent`. See §5.1. |
 | Interaction | Three rows added: inline drag, inline set, inline address. |
 | Accessibility | The tilt slider bullet is restated for the ARIA slider pattern. |
