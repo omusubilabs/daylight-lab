@@ -137,6 +137,10 @@ The tilt diagram gets a grip on the axis; dragging it sets the tilt, clamped to 
 
 ### 5.7 The prose keeps up with the state
 
+Shipped. `src/lib/year/prose.ts` computes every figure and clause below and is unit-tested in
+`test/prose.test.ts`, including a full 0–45° sweep at 0.05° steps checking for the sign bug
+described under "Figures that move".
+
 §5.3 decided which numbers become controls. This decides which of the rest move, and §5.3 is what
 made it urgent: the tilt is now scrubbed continuously from inside the sentence that quotes its
 consequences. It moves the first test in §2 — the effect of the gesture is the sentence being read
@@ -166,6 +170,20 @@ state. What follows is what happens away from it.
 Solar time moves 09:42/15:03 to 09:20/14:40 and 23:11/03:41 to 21:45/02:15. It does not move a day
 length. The dates the copy names — December 21, June 21 — are addresses, not readings, and stay
 fixed however the chart is scrubbed (§5.4).
+
+§2's two figures — the equation-of-time peak and Niigata's solar-noon range — are pinned to the
+local clock regardless of the page's own clock-mode toggle. The paragraph's whole point is the gap
+between local and solar noon; under the solar-time toggle that gap is zero by construction, which
+would flatten the very numbers the paragraph is using to explain why the toggle exists. §1 and §3's
+figures do follow the toggle, since they are general "what does daylight look like" facts rather
+than an explanation of the toggle itself.
+
+A second bug surfaced building this: refraction (`docs/solar-math.md` §7) lets the Sun graze a
+technical sunrise in a roughly 1°-wide tilt band around 28.5–29°, where the geometric peak altitude
+is still negative even though `rise.kind` reads `'event'`. A wording rule keyed only to `'event'`
+vs `'phrase'` printed "climbs to -0.1° above the horizon" in that band. The fix reads the sign of
+the altitude actually computed rather than assuming it from the branch; the swept test above is
+what catches a regression of it.
 
 #### Claims that invert
 

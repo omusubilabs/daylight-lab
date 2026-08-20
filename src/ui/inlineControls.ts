@@ -1,12 +1,15 @@
 /**
- * The live numbers in the prose (docs/design-direction.md §5.3). A number is upgraded to a control
- * only when it is a parameter of the model; a number that is a result recomputes but cannot be
- * grabbed, and the two must never be confusable.
+ * The live numbers in the prose (docs/design-direction.md §5.3, §5.7). A number is upgraded to a
+ * control only when it is a parameter of the model; a number that is a result recomputes but
+ * cannot be grabbed, and the two must never be confusable.
  *
  * Nothing here holds state. The drag and the range input are two controls over one `AppState`.
  */
 import { formatTilt } from '../lib/format.ts';
-import { TILT_MAX_DEG, TILT_MIN_DEG, clampTilt } from '../state/appState.ts';
+import { computeReactiveProse } from '../lib/year/prose.ts';
+import type { ReactiveProse } from '../lib/year/prose.ts';
+import type { ClockMode } from '../lib/time/index.ts';
+import { REFERENCE_YEAR, TILT_MAX_DEG, TILT_MIN_DEG, clampTilt } from '../state/appState.ts';
 import { tiltAfterDrag, tiltAfterKey, tiltValueText } from './tiltInput.ts';
 
 export interface InlineControlsOptions {
@@ -15,7 +18,12 @@ export interface InlineControlsOptions {
 }
 
 export interface InlineControls {
-  update(tiltDeg: number): void;
+  update(tiltDeg: number, clockMode: ClockMode): void;
+}
+
+interface Figure {
+  readonly key: string;
+  readonly element: HTMLElement;
 }
 
 export function createInlineControls(
@@ -24,6 +32,12 @@ export function createInlineControls(
 ): InlineControls {
   const sliders = [...root.querySelectorAll<HTMLElement>('[data-control="tilt"]')];
   const declinations = [...root.querySelectorAll<HTMLElement>('[data-figure="declination"]')];
+  // §5.7: everything else in the prose that recomputes with the tilt, keyed by `data-figure` to
+  // the matching property of `ReactiveProse` — one lookup covers a single span and a whole clause
+  // alike, so a new figure is a new `data-figure` attribute plus a new field, not a new loop.
+  const figures: readonly Figure[] = [...root.querySelectorAll<HTMLElement>('[data-figure]')]
+    .filter((element) => element.dataset.figure !== 'declination')
+    .map((element) => ({ key: element.dataset.figure as string, element }));
 
   // Two presses inside one frame would both read the same stale text, because the number is only
   // written back on redraw; stepping from the value last emitted keeps every press.
@@ -79,8 +93,9 @@ export function createInlineControls(
   }
 
   for (const declination of declinations) declination.classList.add('prose__value');
+  for (const figure of figures) figure.element.classList.add('prose__value');
 
-  const update = (tiltDeg: number): void => {
+  const update = (tiltDeg: number, clockMode: ClockMode): void => {
     const tilt = clampTilt(tiltDeg);
     current = tilt;
     const text = formatTilt(tilt);
@@ -94,6 +109,11 @@ export function createInlineControls(
     // The solstice declination is the obliquity itself — `asin(sin ε · sin λ)` at `λ = ±90°`
     // (docs/solar-math.md §2) — so the sentence's own figures are the tilt read back as a result.
     for (const declination of declinations) declination.textContent = text;
+
+    const prose = computeReactiveProse(tilt, REFERENCE_YEAR, clockMode);
+    for (const figure of figures) {
+      figure.element.textContent = prose[figure.key as keyof ReactiveProse];
+    }
   };
 
   return { update };

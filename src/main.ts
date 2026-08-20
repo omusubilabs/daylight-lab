@@ -143,7 +143,7 @@ function draw(draft: boolean): void {
   }
 
   tiltControl.update(state.tiltDeg);
-  inlineControls.update(state.tiltDeg);
+  inlineControls.update(state.tiltDeg, state.clockMode);
   diagram.update(state.tiltDeg, cityA, cityB);
   cityControls.update(state.cityAId, state.cityBId);
   clockToggle.update(state.clockMode);

@@ -62,10 +62,16 @@
               That angle is the declination: <span data-figure="declination">23.44°</span> north in
               June, <span data-figure="declination">23.44°</span> south in December.
             </p>
+            <!-- Whole clause, not just the numbers: past ~28.5° tilt December goes all the way to a
+                 polar night and no substitution of digits keeps the sentence true
+                 (docs/design-direction.md §5.7). -->
             <p>
               Declination decides how much of the Sun’s daily circle clears your horizon. On
-              December 21 at 61.5°N, very little of it does. The Sun rises at 09:42, climbs to 5.1°
-              above the horizon, and sets again at 15:03. That is 5h 21m of daylight.
+              December 21 at 61.5°N,
+              <span data-figure="dec-clause"
+                >very little of it does. The Sun rises at 09:42, climbs to 5.1° above the horizon,
+                and sets again at 15:03. That is 5h 21m of daylight.</span
+              >
             </p>
             <p>
               Press <b>No tilt (0°)</b>. Declination stays at zero all year and the chart flattens.
@@ -84,14 +90,16 @@
               The first is political. Japan runs on one time zone, anchored to 135°E, and Niigata is
               at 139.0°E — four degrees east of its own clock. The Sun crosses Niigata’s meridian
               about 16 minutes before the clock reaches noon. Tampere has the opposite problem. It
-              sits at 23.8°E on a zone anchored to 30°E, so its solar noon lands late: 12:23 on
-              December 21.
+              sits at 23.8°E on a zone anchored to 30°E, so its solar noon lands late:
+              <span data-figure="tampere-dec-noon">12:23</span> on December 21.
             </p>
             <p>
               The second is orbital. Earth’s orbit is an ellipse and its axis is tilted. Together
-              those run the Sun ahead of or behind the mean clock by up to about a quarter of an
-              hour. That is the equation of time, and it is why Niigata’s solar noon is not parked
-              at 11:44 but wanders between 11:27 and 11:58 over the year.
+              those run the Sun ahead of or behind the mean clock by up to about
+              <span data-figure="eot-peak">16</span> minutes either way. That is the equation of
+              time, and it is why Niigata’s solar noon is not parked at 11:44 but wanders between
+              <span data-figure="niigata-noon-min">11:27</span> and
+              <span data-figure="niigata-noon-max">11:58</span> over the year.
             </p>
             <p>
               Switch the clock control to <b>Solar time</b> to take both effects out. Solar noon
@@ -103,23 +111,31 @@
           <section class="prose__section">
             <h2>White nights</h2>
             <p>
-              Scrub to June 21 and look at Tampere. The Sun sets at 23:11 and rises again at 03:41,
-              four and a half hours later. In between it does not go far down. At its lowest it is
-              5.1° below the horizon.
+              Scrub to June 21 and look at Tampere.
+              <span data-figure="jun-clause"
+                >The Sun sets at 23:11 and rises again at 03:41, 4h 30m later. In between it does
+                not go far down. At its lowest it is 5.1° below the horizon.</span
+              >
             </p>
-            <p>
+            <!-- Whole paragraph: this is the first of the two claims that invert past ~28.5° tilt,
+                 when Tampere's white nights become genuine midnight sun (§5.7). -->
+            <p data-figure="twilight-clause">
               Civil twilight ends at 6° below. Tampere never gets there. From June 5 to July 7, 33
               nights running, the sky stays inside civil twilight until sunrise and the chart never
               reaches its night color. That is what white nights are: not midnight sun, but a night
               that never finishes darkening.
             </p>
-            <p>
-              None of this needs the Arctic Circle, which is another 5° north at 66.6°N, some 560 km
-              away. Tampere gets no midnight sun on any date of the year.
+            <!-- Whole paragraph: the second inverting claim. Past ~28.5° tilt the Arctic Circle
+                 sits south of Tampere, not north of it, and "no midnight sun" stops being true
+                 (§5.7). -->
+            <p data-figure="polar-circle-clause">
+              None of this needs the Arctic Circle, which is another 5.1° north at 66.6°N, some 564
+              km away. Tampere gets no midnight sun on any date of the year at this tilt.
             </p>
             <p>
-              Niigata on the same night is unremarkable. Its Sun drops to 28.7° below the horizon
-              and the night gets properly dark.
+              Niigata on the same night is unremarkable. Its Sun drops to
+              <span data-figure="niigata-jun-min-alt">28.7°</span> below the horizon and the night
+              gets properly dark.
             </p>
           </section>
         </div>

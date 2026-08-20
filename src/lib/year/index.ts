@@ -8,6 +8,20 @@ export { monthlySamples } from './monthly.ts';
 export type { MonthlySample } from './monthly.ts';
 
 export {
+  computeReactiveProse,
+  decemberClause,
+  decemberSolarNoon,
+  equationOfTimePeakMinutes,
+  juneClause,
+  longestCivilTwilightRun,
+  niigataJuneMinAltitude,
+  niigataSolarNoonRange,
+  polarCircleClause,
+  whiteNightsClause,
+} from './prose.ts';
+export type { ReactiveProse, SolarNoonRange, TwilightRun } from './prose.ts';
+
+export {
   dateFromDayIndex,
   dayCountInYear,
   dayIndexFromDate,
