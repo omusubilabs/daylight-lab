@@ -32,8 +32,10 @@ docs/
 .claude/skills/solar-verify/       verification procedure for the astronomy layer
 src/lib/solar/                     pure math, no DOM, fully unit tested
 src/data/cities.ts                 curated city list with IANA zones
+public/                            favicon, share card, touch icon — copied into dist untouched
 scripts/dump-year.ts               debugging tool: CSV dump of a full year
 scripts/fixture-worksheet.ts       emits the blank sheet for the NOAA transcription
+scripts/og-image.ts                emits the share card as SVG; public/og.png is rasterized by hand
 test/fixtures/noaa-golden.json     external ground truth — read-only, written by hand
 ```
 

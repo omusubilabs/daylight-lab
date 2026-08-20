@@ -3,11 +3,10 @@ import type { ThresholdName } from '../lib/solar/index.ts';
 import type { YearSeries } from '../lib/year/index.ts';
 import { el, svgEl } from '../ui/dom.ts';
 import {
-  FRAME,
-  PLOT,
-  PLOT_INSET,
+  DEFAULT_LAYOUT,
   PLOT_VIEW,
   bandPath,
+  chartLayout,
   frameX,
   frameY,
   hourLabel,
@@ -16,7 +15,7 @@ import {
   monthTicks,
   plotViewX,
 } from './geometry.ts';
-import type { BandPoint, LinePoint } from './geometry.ts';
+import type { BandPoint, ChartLayout, LinePoint } from './geometry.ts';
 
 /** Back to front: each band is drawn over the wider one beneath it (docs/ui-spec.md). */
 const BAND_LAYERS = [
@@ -90,33 +89,39 @@ function captionText(a: YearSeries, b: YearSeries): string {
   );
 }
 
-function axisGroup(dayCount: number, ticks: ReturnType<typeof monthTicks>): SVGGElement {
-  const group = svgEl('g', { class: 'chart__axis' });
+/** Rebuilt rather than moved on a resize: twenty-one labels is cheaper than tracking them. */
+function fillAxis(
+  group: SVGGElement,
+  layout: ChartLayout,
+  dayCount: number,
+  ticks: ReturnType<typeof monthTicks>,
+): void {
+  const labels: SVGTextElement[] = [];
 
   for (const hour of hourRules()) {
     const label = svgEl('text', {
       class: 'chart__tick chart__tick--time',
-      x: PLOT.x - 10,
-      y: frameY(hour * 60),
+      x: layout.plot.x - 10,
+      y: frameY(layout, hour * 60),
       'text-anchor': 'end',
       'dominant-baseline': 'middle',
     });
     label.textContent = hourLabel(hour);
-    group.append(label);
+    labels.push(label);
   }
 
   for (const tick of ticks) {
     const label = svgEl('text', {
       class: 'chart__tick chart__tick--month',
-      x: frameX(tick.labelIndex, dayCount),
-      y: PLOT.y + PLOT.height + 18,
+      x: frameX(layout, tick.labelIndex, dayCount),
+      y: layout.plot.y + layout.plot.height + 18,
       'text-anchor': 'middle',
     });
     label.textContent = tick.label;
-    group.append(label);
+    labels.push(label);
   }
 
-  return group;
+  group.replaceChildren(...labels);
 }
 
 function rulesGroup(dayCount: number, ticks: ReturnType<typeof monthTicks>): SVGGElement {
@@ -163,18 +168,12 @@ export function createYearChart(initial: ChartData): YearChart {
   const ticks = monthTicks(initial.a.days);
   const dayCount = initial.a.dayCount;
 
-  const frame = svgEl('svg', {
-    class: 'chart__svg',
-    viewBox: `0 0 ${FRAME.width} ${FRAME.height}`,
-    role: 'img',
-  });
+  let layout = DEFAULT_LAYOUT;
+
+  const frame = svgEl('svg', { class: 'chart__svg', role: 'img' });
 
   const plot = svgEl('svg', {
     class: 'chart__plot',
-    x: PLOT.x,
-    y: PLOT.y,
-    width: PLOT.width,
-    height: PLOT.height,
     viewBox: `0 0 ${PLOT_VIEW.width} ${PLOT_VIEW.height}`,
     preserveAspectRatio: 'none',
   });
@@ -202,25 +201,17 @@ export function createYearChart(initial: ChartData): YearChart {
     return { edge, halo, line };
   });
 
-  const cursor = svgEl('line', {
-    class: 'chart__cursor',
-    y1: 0,
-    y2: PLOT_VIEW.height,
-    x1: 0,
-    x2: 0,
+  // The cursor crosses bands from near-black to near-white, so it is drawn twice: a dark halo
+  // that reads against the daylight band, and the dashes that read against the night behind it.
+  const cursors = ['chart__cursor-halo', 'chart__cursor'].map((className) => {
+    const line = svgEl('line', { class: className, y1: 0, y2: PLOT_VIEW.height, x1: 0, x2: 0 });
+    plot.append(line);
+    return line;
   });
-  plot.append(cursor);
 
-  frame.append(axisGroup(dayCount, ticks), plot);
-  frame.append(
-    svgEl('rect', {
-      class: 'chart__frame',
-      x: PLOT.x,
-      y: PLOT.y,
-      width: PLOT.width,
-      height: PLOT.height,
-    }),
-  );
+  const axis = svgEl('g', { class: 'chart__axis' });
+  const border = svgEl('rect', { class: 'chart__frame' });
+  frame.append(axis, plot, border);
 
   const scrubSurface = el('div', 'chart__scrub');
   scrubSurface.tabIndex = 0;
@@ -229,10 +220,6 @@ export function createYearChart(initial: ChartData): YearChart {
   scrubSurface.setAttribute('aria-orientation', 'horizontal');
   scrubSurface.setAttribute('aria-valuemin', '1');
   scrubSurface.setAttribute('aria-valuemax', String(dayCount));
-  scrubSurface.style.left = `${PLOT_INSET.left * 100}%`;
-  scrubSurface.style.top = `${PLOT_INSET.top * 100}%`;
-  scrubSurface.style.width = `${PLOT_INSET.width * 100}%`;
-  scrubSurface.style.height = `${PLOT_INSET.height * 100}%`;
 
   const stage = el('div', 'chart__stage');
   stage.append(frame, scrubSurface);
@@ -245,10 +232,45 @@ export function createYearChart(initial: ChartData): YearChart {
   const figure = el('figure', 'chart');
   figure.append(stage, legend);
 
+  const applyLayout = (): void => {
+    frame.setAttribute('viewBox', `0 0 ${layout.width} ${layout.height}`);
+
+    for (const element of [plot, border]) {
+      element.setAttribute('x', String(layout.plot.x));
+      element.setAttribute('y', String(layout.plot.y));
+      element.setAttribute('width', String(layout.plot.width));
+      element.setAttribute('height', String(layout.plot.height));
+    }
+
+    scrubSurface.style.left = `${layout.inset.left * 100}%`;
+    scrubSurface.style.top = `${layout.inset.top * 100}%`;
+    scrubSurface.style.width = `${layout.inset.width * 100}%`;
+    scrubSurface.style.height = `${layout.inset.height * 100}%`;
+
+    fillAxis(axis, layout, dayCount, ticks);
+  };
+
+  const setLayout = (width: number, height: number): void => {
+    const next = chartLayout(width, height);
+    if (next.width === layout.width && next.height === layout.height) return;
+    layout = next;
+    applyLayout();
+  };
+
+  // The frame's units are CSS pixels, so the chart has to be told how large it was actually
+  // drawn. Its own box is what CSS sizes, and nothing here can change that box, so this cannot
+  // feed back on itself.
+  new ResizeObserver((entries) => {
+    const box = entries[entries.length - 1]?.contentRect;
+    if (box && box.width > 0) setLayout(box.width, box.height);
+  }).observe(stage);
+
   const setCursor = (dayIndex: number): void => {
     const x = plotViewX(dayIndex, dayCount).toFixed(1);
-    cursor.setAttribute('x1', x);
-    cursor.setAttribute('x2', x);
+    for (const line of cursors) {
+      line.setAttribute('x1', x);
+      line.setAttribute('x2', x);
+    }
   };
 
   const update = ({ a, b, dayIndex }: ChartData): void => {
@@ -265,6 +287,7 @@ export function createYearChart(initial: ChartData): YearChart {
     caption.textContent = captionText(a, b);
   };
 
+  applyLayout();
   update(initial);
   return { element: figure, scrubSurface, update, setCursor };
 }

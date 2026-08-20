@@ -17,6 +17,7 @@ import type { AppState } from './state/appState.ts';
 import { formatHash, parseHash } from './state/hash.ts';
 import { createCityControls } from './ui/cityControls.ts';
 import { createClockToggle } from './ui/clockToggle.ts';
+import { createDataTable } from './ui/dataTable.ts';
 import { createDayReadout } from './ui/dayReadout.ts';
 import { el } from './ui/dom.ts';
 import { createTiltControl } from './ui/tiltControl.ts';
@@ -83,9 +84,10 @@ let seriesB = seriesFor(requireCity(state.cityBId), 1);
 let renderedSeriesKey = seriesKey(1);
 
 const chart = createYearChart({ a: seriesA, b: seriesB, dayIndex: state.dayIndex });
+const dataTable = createDataTable(seriesA, seriesB);
 const readout = createDayReadout();
 
-app.append(tiltControl.element, chartControls, chart.element, readout.element);
+app.append(tiltControl.element, chartControls, chart.element, dataTable.element, readout.element);
 
 function seriesKey(sampleStep: number): string {
   return [state.tiltDeg, state.cityAId, state.cityBId, state.clockMode, sampleStep].join('|');
@@ -101,6 +103,9 @@ function draw(draft: boolean): void {
     seriesB = seriesFor(cityB, sampleStep);
     renderedSeriesKey = seriesKey(sampleStep);
     chart.update({ a: seriesA, b: seriesB, dayIndex: state.dayIndex });
+    // The hidden table is a reading surface, not a moving one: it is left alone until the drag
+    // settles and the full-resolution year is back.
+    if (!draft) dataTable.update(seriesA, seriesB);
   } else {
     chart.setCursor(state.dayIndex);
   }

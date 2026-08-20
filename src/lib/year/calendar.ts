@@ -73,9 +73,13 @@ export function shiftMonths(year: number, index: number, delta: number): number 
   return index;
 }
 
+export function monthName(month: number): string {
+  return MONTH_NAMES[month - 1] ?? '';
+}
+
 export function formatMonthDay(year: number, index: number): string {
   const { month, dayOfMonth } = dateFromDayIndex(year, index);
-  return `${MONTH_NAMES[month - 1]} ${dayOfMonth}`;
+  return `${monthName(month)} ${dayOfMonth}`;
 }
 
 export function formatLongDate(year: number, index: number): string {

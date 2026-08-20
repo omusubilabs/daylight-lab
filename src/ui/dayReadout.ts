@@ -1,8 +1,7 @@
 import type { City } from '../data/cities.ts';
-import { formatAltitude, formatDuration, formatHhMm, formatLatitude } from '../lib/format.ts';
-import { clockMinutes, clockSuffix } from '../lib/time/index.ts';
+import { formatDuration, formatLatitude } from '../lib/format.ts';
 import type { ClockMode } from '../lib/time/index.ts';
-import { clockContextFor, formatLongDate, formatMonthDay } from '../lib/year/index.ts';
+import { dayReading, formatLongDate, formatMonthDay, withSuffix } from '../lib/year/index.ts';
 import type { YearDay } from '../lib/year/index.ts';
 import { el } from './dom.ts';
 
@@ -48,31 +47,19 @@ function cityPanel(role: 'a' | 'b'): CityPanel {
   return { element, name, latitude, values };
 }
 
-/** docs/ui-spec.md — a time is replaced by a phrase, never faked, when the event does not happen. */
-function eventText(day: YearDay, edge: 'rise' | 'set', suffix: string, minutes: number): string {
-  const event = day[edge];
-  if (event.kind === 'alwaysAbove') return 'Midnight sun';
-  if (event.kind === 'alwaysBelow') return 'Polar night';
-  return `${formatHhMm(minutes)} ${suffix}`;
-}
-
 function fillPanel(panel: CityPanel, entry: CityDay, mode: ClockMode): void {
   const { city, day } = entry;
-  const clock = clockContextFor(city, day, mode);
-  const suffix = clockSuffix(day.solarNoonUtcMs, clock);
+  const reading = dayReading(city, day, mode);
 
   panel.name.textContent = city.name;
   panel.latitude.textContent = formatLatitude(city.latitudeDeg);
 
-  const rise = day.rise.kind === 'event' ? clockMinutes(day.rise.utcMs, clock) : 0;
-  const set = day.set.kind === 'event' ? clockMinutes(day.set.utcMs, clock) : 0;
-
   const texts = [
-    eventText(day, 'rise', suffix, rise),
-    eventText(day, 'set', suffix, set),
-    formatDuration(day.dayLengthMinutes),
-    `${formatHhMm(day.solarNoonMinutes)} ${suffix}`,
-    formatAltitude(day.maxAltitudeDeg),
+    withSuffix(reading.sunrise, reading.suffix),
+    withSuffix(reading.sunset, reading.suffix),
+    reading.dayLength,
+    `${reading.solarNoon} ${reading.suffix}`,
+    reading.maxAltitude,
   ];
 
   panel.values.forEach((value, index) => {

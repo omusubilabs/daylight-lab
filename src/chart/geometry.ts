@@ -3,17 +3,71 @@
  * where axis text lives at a fixed size, and the plot's own space, which a nested `<svg>` with
  * `preserveAspectRatio="none"` stretches into the plot rectangle. Plot y is simply minutes since
  * local midnight, so a path's numbers are readable as clock times.
+ *
+ * The frame is measured in CSS pixels rather than in a fixed viewBox, so `13px` axis text is 13px
+ * whether the chart is 1060 wide on a desktop or 343 wide on a phone. Only the plot is ever
+ * stretched, which is why its aspect ratio can change with the viewport and the labels cannot.
  */
 
 const MINUTES_PER_DAY = 1440;
 
-export const FRAME = { width: 1100, height: 420 } as const;
+/** Room for the hour labels on the left, the month initials below, and half a line above. */
+const GUTTER = { left: 54, top: 14, right: 12, bottom: 28 } as const;
 
-export const PLOT = { x: 54, y: 14, width: 1034, height: 378 } as const;
+/** What the chart draws at before it has been measured, and the desktop size in practice. */
+export const DEFAULT_FRAME = { width: 1100, height: 420 } as const;
+
+/** Below this the axis would eat the plot; a chart this small is off-spec anyway. */
+const MIN_PLOT = { width: 120, height: 120 } as const;
 
 export const PLOT_VIEW = { width: 1000, height: MINUTES_PER_DAY } as const;
 
 export const HOUR_STEP = 3;
+
+export interface Rect {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+}
+
+export interface ChartLayout {
+  readonly width: number;
+  readonly height: number;
+  readonly plot: Rect;
+  /** The plot rectangle as fractions of the frame, so an overlay can sit exactly on top of it. */
+  readonly inset: {
+    readonly left: number;
+    readonly top: number;
+    readonly width: number;
+    readonly height: number;
+  };
+}
+
+export function chartLayout(width: number, height: number): ChartLayout {
+  const frameWidth = Math.max(width, GUTTER.left + GUTTER.right + MIN_PLOT.width);
+  const frameHeight = Math.max(height, GUTTER.top + GUTTER.bottom + MIN_PLOT.height);
+  const plot: Rect = {
+    x: GUTTER.left,
+    y: GUTTER.top,
+    width: frameWidth - GUTTER.left - GUTTER.right,
+    height: frameHeight - GUTTER.top - GUTTER.bottom,
+  };
+
+  return {
+    width: frameWidth,
+    height: frameHeight,
+    plot,
+    inset: {
+      left: plot.x / frameWidth,
+      top: plot.y / frameHeight,
+      width: plot.width / frameWidth,
+      height: plot.height / frameHeight,
+    },
+  };
+}
+
+export const DEFAULT_LAYOUT = chartLayout(DEFAULT_FRAME.width, DEFAULT_FRAME.height);
 
 const MONTH_INITIALS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'] as const;
 
@@ -22,21 +76,13 @@ export function plotViewX(index: number, dayCount: number): number {
   return dayCount < 2 ? 0 : (index / (dayCount - 1)) * PLOT_VIEW.width;
 }
 
-export function frameX(index: number, dayCount: number): number {
-  return PLOT.x + (plotViewX(index, dayCount) / PLOT_VIEW.width) * PLOT.width;
+export function frameX(layout: ChartLayout, index: number, dayCount: number): number {
+  return layout.plot.x + (plotViewX(index, dayCount) / PLOT_VIEW.width) * layout.plot.width;
 }
 
-export function frameY(minutes: number): number {
-  return PLOT.y + (minutes / MINUTES_PER_DAY) * PLOT.height;
+export function frameY(layout: ChartLayout, minutes: number): number {
+  return layout.plot.y + (minutes / MINUTES_PER_DAY) * layout.plot.height;
 }
-
-/** The plot rectangle as fractions of the frame, so an overlay can sit exactly on top of it. */
-export const PLOT_INSET = {
-  left: PLOT.x / FRAME.width,
-  top: PLOT.y / FRAME.height,
-  width: PLOT.width / FRAME.width,
-  height: PLOT.height / FRAME.height,
-} as const;
 
 /** The inverse of `plotViewX`: which day the pointer is over, 0 at the left edge and 1 at the right. */
 export function dayIndexAtFraction(fraction: number, dayCount: number): number {

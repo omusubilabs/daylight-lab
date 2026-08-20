@@ -1,8 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
+  DEFAULT_FRAME,
+  DEFAULT_LAYOUT,
   PLOT_VIEW,
   bandPath,
+  chartLayout,
   dayIndexAtFraction,
+  frameX,
+  frameY,
   hourRules,
   linePath,
   monthTicks,
@@ -249,6 +254,68 @@ describe('finding the day under the pointer', () => {
   it('inverts plotViewX for every day of the year', () => {
     for (let index = 0; index < 365; index++) {
       expect(dayIndexAtFraction(plotViewX(index, 365) / PLOT_VIEW.width, 365)).toBe(index);
+    }
+  });
+});
+
+/**
+ * The frame is measured in CSS pixels so that axis text never scales (docs/ui-spec.md). What the
+ * layout has to guarantee is that the plot stays inside the frame at any size the page hands it,
+ * including the ~320px-tall phone chart.
+ */
+describe('chart layout', () => {
+  const sizes = [
+    DEFAULT_LAYOUT,
+    chartLayout(343, 320),
+    chartLayout(668, 320),
+    chartLayout(1060, 420),
+  ];
+
+  it('keeps the desktop frame as the default', () => {
+    expect(DEFAULT_LAYOUT.width).toBe(DEFAULT_FRAME.width);
+    expect(DEFAULT_LAYOUT.height).toBe(DEFAULT_FRAME.height);
+  });
+
+  it('leaves a constant gutter for the axis at every size', () => {
+    for (const layout of sizes) {
+      expect(layout.plot.x).toBe(DEFAULT_LAYOUT.plot.x);
+      expect(layout.plot.y).toBe(DEFAULT_LAYOUT.plot.y);
+      expect(layout.width - layout.plot.width - layout.plot.x).toBe(
+        DEFAULT_FRAME.width - DEFAULT_LAYOUT.plot.width - DEFAULT_LAYOUT.plot.x,
+      );
+      expect(layout.height - layout.plot.height - layout.plot.y).toBe(
+        DEFAULT_FRAME.height - DEFAULT_LAYOUT.plot.height - DEFAULT_LAYOUT.plot.y,
+      );
+    }
+  });
+
+  it('never lets the axis eat the plot, however small the box gets', () => {
+    for (const [width, height] of [
+      [0, 0],
+      [120, 90],
+      [-40, 10],
+    ]) {
+      const layout = chartLayout(width ?? 0, height ?? 0);
+      expect(layout.plot.width).toBeGreaterThan(0);
+      expect(layout.plot.height).toBeGreaterThan(0);
+    }
+  });
+
+  it('spans the plot rectangle exactly, from the first day to the last', () => {
+    for (const layout of sizes) {
+      expect(frameX(layout, 0, 365)).toBeCloseTo(layout.plot.x, 6);
+      expect(frameX(layout, 364, 365)).toBeCloseTo(layout.plot.x + layout.plot.width, 6);
+      expect(frameY(layout, 0)).toBeCloseTo(layout.plot.y, 6);
+      expect(frameY(layout, 1440)).toBeCloseTo(layout.plot.y + layout.plot.height, 6);
+    }
+  });
+
+  it('reports the plot as fractions an overlay can be positioned with', () => {
+    for (const layout of sizes) {
+      expect(layout.inset.left * layout.width).toBeCloseTo(layout.plot.x, 6);
+      expect(layout.inset.width * layout.width).toBeCloseTo(layout.plot.width, 6);
+      expect(layout.inset.top * layout.height).toBeCloseTo(layout.plot.y, 6);
+      expect(layout.inset.height * layout.height).toBeCloseTo(layout.plot.height, 6);
     }
   });
 });

@@ -17,8 +17,18 @@
     <meta property="og:site_name" content="Omusubi Labs Experiments" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://daylight-lab.omusubilabs.fi/" />
+    <meta property="og:image" content="https://daylight-lab.omusubilabs.fi/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="A year of daylight in Tampere: a chart of sunrise and sunset through 2026, with Niigata overlaid."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#0f172a" />
     <link rel="canonical" href="https://daylight-lab.omusubilabs.fi/" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <script type="module" src="/src/main.ts"></script>
   </head>
@@ -27,13 +37,129 @@
       <header class="site-header">
         <h1>Daylight Lab</h1>
         <p class="subtitle">
-          Drag Earth's axial tilt and watch a year of daylight rearrange itself for two cities at
+          Drag Earth’s axial tilt and watch a year of daylight rearrange itself for two cities at
           once.
         </p>
         <p class="year-badge">Year 2026</p>
       </header>
 
-      <main id="app"></main>
+      <main>
+        <div id="app"></div>
+
+        <div class="prose">
+          <section class="prose__section">
+            <h2>Why the north goes dark</h2>
+            <p>
+              Tampere sits at 61.5°N. That number on its own does not explain the winter. Latitude
+              decides how far north you are; it does not decide that December is dark.
+            </p>
+            <p>
+              The tilt does that. Earth’s axis leans 23.44° away from the perpendicular of its
+              orbit, and it keeps pointing at the same distant spot all year. As the planet goes
+              around, the Sun’s angle above the equator swings with it. That angle is the
+              declination: 23.44° north in June, 23.44° south in December.
+            </p>
+            <p>
+              Declination decides how much of the Sun’s daily circle clears your horizon. On
+              December 21 at 61.5°N, very little of it does. The Sun rises at 09:42, climbs to 5.1°
+              above the horizon, and sets again at 15:03. That is 5h 21m of daylight.
+            </p>
+            <p>
+              Press <b>No tilt (0°)</b>. Declination stays at zero all year and the chart flattens.
+              Tampere then gets 12h 14m of daylight on every date, December and June within five
+              seconds of each other.
+            </p>
+          </section>
+
+          <section class="prose__section">
+            <h2>Noon is not at 12:00</h2>
+            <p>
+              Solar noon is the moment the Sun is highest. It is almost never at 12:00, for two
+              unrelated reasons.
+            </p>
+            <p>
+              The first is political. Japan runs on one time zone, anchored to 135°E, and Niigata is
+              at 139.0°E — four degrees east of its own clock. The Sun crosses Niigata’s meridian
+              about 16 minutes before the clock reaches noon. Tampere has the opposite problem. It
+              sits at 23.8°E on a zone anchored to 30°E, so its solar noon lands late: 12:23 on
+              December 21.
+            </p>
+            <p>
+              The second is orbital. Earth’s orbit is an ellipse and its axis is tilted. Together
+              those run the Sun ahead of or behind the mean clock by up to about a quarter of an
+              hour. That is the equation of time, and it is why Niigata’s solar noon is not parked
+              at 11:44 but wanders between 11:27 and 11:58 over the year.
+            </p>
+            <p>
+              Switch the clock control to <b>Solar time</b> to take both effects out. Solar noon
+              then sits at exactly 12:00 on every date, and the daylight band becomes symmetric
+              around it.
+            </p>
+          </section>
+
+          <section class="prose__section">
+            <h2>White nights</h2>
+            <p>
+              Scrub to June 21 and look at Tampere. The Sun sets at 23:11 and rises again at 03:41,
+              four and a half hours later. In between it does not go far down. At its lowest it is
+              5.1° below the horizon.
+            </p>
+            <p>
+              Civil twilight ends at 6° below. Tampere never gets there. From June 5 to July 7, 33
+              nights running, the sky stays inside civil twilight until sunrise and the chart never
+              reaches its night color. That is what white nights are: not midnight sun, but a night
+              that never finishes darkening.
+            </p>
+            <p>
+              None of this needs the Arctic Circle, which is another 5° north at 66.6°N, some 560 km
+              away. Tampere gets no midnight sun on any date of the year.
+            </p>
+            <p>
+              Niigata on the same night is unremarkable. Its Sun drops to 28.7° below the horizon
+              and the night gets properly dark.
+            </p>
+          </section>
+        </div>
+
+        <details class="methods">
+          <summary class="methods__summary">
+            <h2 class="methods__title">Methods and limits</h2>
+          </summary>
+          <div class="methods__body">
+            <p>
+              Sun positions use the NOAA solar calculator’s formulation, accurate to roughly a
+              minute for sunrise and sunset at mid-latitudes. Every figure here is computed in your
+              browser. Nothing is fetched from a server.
+            </p>
+            <p>
+              Moving the slider away from 23.44° gives a teaching model, not a physically
+              self-consistent alternate Earth. The small nutation and aberration terms in the NOAA
+              series were fitted to the real Earth and are kept unchanged. At 23.44° the numbers
+              match NOAA. Away from it, read the shape rather than the minutes.
+            </p>
+            <p>
+              Refraction is a fixed 0.833° allowance, with no correction for pressure or
+              temperature. The Sun meets the horizon at a shallower angle the further you go from
+              the equator, so that allowance adds about 7 minutes to the day at the equator, 14
+              minutes at Tampere and 19 at Tromsø. It is why a 0° tilt gives 12h 14m rather than
+              exactly 12h.
+            </p>
+            <p>
+              Observer elevation is ignored; everything is computed at sea level. Time zone rules,
+              daylight saving included, come from your browser’s own database. The reference year is
+              fixed at 2026 so that a shared link always shows the same year.
+            </p>
+          </div>
+        </details>
+      </main>
+
+      <footer class="site-footer">
+        <p class="site-footer__brand">Omusubi Labs Experiments</p>
+        <nav class="site-footer__links" aria-label="Elsewhere">
+          <a href="https://omusubilabs.fi/">All experiments</a>
+          <a href="https://github.com/omusubilabs/daylight-lab">Source on GitHub</a>
+        </nav>
+      </footer>
     </div>
   </body>
 </html>
