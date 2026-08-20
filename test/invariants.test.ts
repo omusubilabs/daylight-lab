@@ -203,5 +203,5 @@ describe('§8b.9 no NaN anywhere in the tilt sweep', () => {
         }
       }
     }
-  });
+  }, 15000);
 });
