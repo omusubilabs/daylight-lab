@@ -62,11 +62,6 @@ function firstOfEachMonth2026(): number[] {
   return Array.from({ length: 12 }, (_, i) => utcMidnightMs(2026, i + 1, 1));
 }
 
-// §8b.1. The spec states ~12h07m "at every latitude", but that only holds near the equator: the
-// 0.833° refraction allowance in the sunrise zenith buys more time the shallower the Sun's path
-// is, so at zero tilt the day runs 12h07m at the equator, 12h14m at Tampere and 12h19m at Tromsø.
-// The seasonless part of the claim — no variation across the year — is what the test enforces
-// everywhere; the 12h07m figure is asserted where it is true.
 describe('§8b.1 zero tilt removes the seasons', () => {
   it('holds day length constant across the year at every latitude', () => {
     for (const city of CITIES) {
@@ -78,7 +73,7 @@ describe('§8b.1 zero tilt removes the seasons', () => {
     }
   });
 
-  it('gives every latitude a day slightly longer than 12h, ~12h07m below 40°', () => {
+  it('gives every latitude a day slightly longer than 12h, ~12h07m at or below 40°', () => {
     for (const city of CITIES) {
       const minutes = dayEvents(query(city, JUNE_SOLSTICE, 0)).minutesAboveZenith;
       expect(minutes, city.name).toBeGreaterThan(720);
@@ -105,12 +100,8 @@ describe('§8b.2 the equation of time follows the tilt', () => {
   });
 });
 
-// §8b.3. Same refraction caveat as §8b.1, plus a second one: a calendar date sits up to half a
-// day off the true equinox instant, which tilts the declination a little further. Together they
-// push the excess past the spec's ±10min above roughly 35°, so that bound is asserted where it
-// holds and a one-sided bound covers the rest of the range below 65°.
 describe('§8b.3 equinox day length', () => {
-  it('is 12h ± 10min below 35° and never shorter than 12h below 65°', () => {
+  it('is 12h ± 10min at or below 35° and never shorter than 12h below 65°', () => {
     for (const midnightMs of [MARCH_EQUINOX, SEPTEMBER_EQUINOX]) {
       for (let latitudeDeg = -64; latitudeDeg <= 64; latitudeDeg += 4) {
         const city = { name: `lat ${latitudeDeg}`, latitudeDeg, longitudeDeg: 0 };

@@ -172,7 +172,9 @@ interpolate between sampled tilts.
   default 23.44° the model matches NOAA; away from it, it is a well-behaved teaching model, not
   an ephemeris. Say this in the UI's methods note.
 - Refraction is the fixed 0.833° allowance baked into the 90.833° zenith. No pressure or
-  temperature dependence.
+  temperature dependence. The Sun's path meets the horizon at a shallower angle the further you
+  go from the equator, so that allowance lengthens the day by about 7 minutes at the equator,
+  14 at Tampere and 19 at Tromsø.
 - Observer elevation is ignored (sea level). This costs a minute or two in mountain cities.
 - Circular-ish orbit assumptions inside the NOAA series are accurate to roughly ±1 minute for
   1900–2100, which is well inside our tolerance.
@@ -194,14 +196,19 @@ These files are read-only for Claude Code. See `.claude/skills/solar-verify/SKIL
 
 These need no external data and catch the tilt-wiring bugs that fixtures at 23.44° cannot:
 
-1. **Zero tilt.** At `obliquityDeg = 0`, day length is ~12h07m at every latitude on every date,
-   and varies by less than 2 minutes across the year. (Slightly over 12h because of refraction.)
+1. **Zero tilt.** At `obliquityDeg = 0`, day length at a given latitude varies by less than 2
+   minutes across the year: the seasons are gone. Refraction (§7) sets the level — 12h07m at the
+   equator, 12h08m at Niigata, 12h14m at Tampere, 12h19m at Tromsø. Assert the annual constancy
+   at every latitude, and the 12h07m figure at or below 40°.
 2. **Zero tilt, equation of time.** At 0° tilt the obliquity component of the equation of time
    vanishes, leaving only the eccentricity term: |eot| stays under about 8 minutes all year,
    versus about 16 minutes at 23.44°. This test fails if `y` was not recomputed from the
    parameter.
-3. **Equinox.** On the March and September equinoxes, day length is 12h±10min at all latitudes
-   below 65°.
+3. **Equinox.** On the March and September equinoxes the day runs longer than 12h at every
+   latitude: by under 10 minutes at or below 35°, and by under 20 minutes from there to 65°
+   (+13 min at Tampere, +15 min at Reykjavík). The excess is refraction (§7) plus the declination
+   a calendar date leaves standing against the true equinox instant. Assert the ±10min band at or
+   below 35° and the one-sided bound above it.
 4. **Noon symmetry.** `(sunrise + sunset) / 2 == solarNoon` within 30 s, for every fixture case.
 5. **Polar circle.** With `obliquityDeg = 40`, Tampere (61.5°N) returns `alwaysAbove` for the
    90.833° threshold on the June solstice and `alwaysBelow` on the December solstice. With
