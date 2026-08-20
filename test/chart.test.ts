@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_FRAME,
   DEFAULT_LAYOUT,
+  DOCKED_GUTTER,
   PLOT_VIEW,
   bandPath,
   chartLayout,
@@ -317,5 +318,40 @@ describe('chart layout', () => {
       expect(layout.inset.top * layout.height).toBeCloseTo(layout.plot.y, 6);
       expect(layout.inset.height * layout.height).toBeCloseTo(layout.plot.height, 6);
     }
+  });
+});
+
+/**
+ * Docked, the chart drops its axis labels (docs/design-direction.md §5.2), so the gutter that
+ * held them has to go with them — a strip 150px tall cannot spend 42 of them on empty margin.
+ */
+describe('the docked layout', () => {
+  const docked = [chartLayout(1060, 150, DOCKED_GUTTER), chartLayout(343, 110, DOCKED_GUTTER)];
+
+  it('takes the box it is given rather than the axis floor', () => {
+    expect(docked.map((layout) => layout.height)).toEqual([150, 110]);
+    expect(docked.map((layout) => layout.width)).toEqual([1060, 343]);
+  });
+
+  it('gives the plot all but the border of the frame', () => {
+    for (const layout of docked) {
+      expect(layout.plot.width).toBe(layout.width - 2);
+      expect(layout.plot.height).toBe(layout.height - 2);
+    }
+  });
+
+  it('still spans the plot rectangle exactly, from the first day to the last', () => {
+    for (const layout of docked) {
+      expect(frameX(layout, 0, 365)).toBeCloseTo(layout.plot.x, 6);
+      expect(frameX(layout, 364, 365)).toBeCloseTo(layout.plot.x + layout.plot.width, 6);
+      expect(frameY(layout, 0)).toBeCloseTo(layout.plot.y, 6);
+      expect(frameY(layout, 1440)).toBeCloseTo(layout.plot.y + layout.plot.height, 6);
+    }
+  });
+
+  it('buys the strip back the room the axis was holding', () => {
+    expect(chartLayout(1060, 150, DOCKED_GUTTER).plot.height).toBeGreaterThan(
+      chartLayout(1060, 150).plot.height,
+    );
   });
 });

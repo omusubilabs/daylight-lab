@@ -16,14 +16,18 @@ Single column, max width 1100px, centered. Order top to bottom:
 3. **Tilt diagram** — small inline SVG (~220×160): the Sun, Earth's orbit plane, and the axis
    drawn at the current tilt, with the two cities' latitudes marked as ticks. Redraws live with
    the slider. This is the causal bridge between the abstract number and the chart.
-4. **Year chart** — the main artifact. Full width, ~420px tall on desktop.
+4. **Year chart** — the main artifact. Full width, ~420px tall on desktop, and sticky at the top
+   of the viewport so that it is still on screen while the prose discussing it is read. Docked, it
+   shortens to 150px and drops its axis labels and legend; the scrub cursor stays
+   (`docs/design-direction.md` §5.2).
 5. **Day readout** — a row of figures for the scrubbed date, city A vs city B side by side.
 6. **Explainers** — three short prose sections (see `docs/content-en.md`).
 7. **Methods & limits** — collapsible; states the simplifications from `docs/solar-math.md` §7.
 8. **Footer** — Omusubi Labs Experiments, link back to the experiments index, source link.
 
-Below 700px: the chart keeps full width but drops to ~320px tall, the day readout stacks
-vertically, and the tilt diagram sits beside the slider readout rather than below it.
+Below 700px: the chart keeps full width but drops to ~320px tall, and to 110px docked; the day
+readout stacks vertically, and the tilt diagram sits beside the slider readout rather than below
+it.
 
 ## Year chart geometry
 
@@ -41,6 +45,8 @@ vertically, and the tilt diagram sits beside the slider readout rather than belo
   the path closed. Test this by setting tilt to 40° and confirming there are no holes.
 - **DST discontinuity** in local-clock mode is a genuine vertical step. Do not smooth it, do not
   interpolate across it — break the path and start a new segment.
+- **Docked**, the axis gutter goes to zero and the plot takes the whole frame but for its border.
+  The labels are removed rather than hidden, so nothing holds room it no longer needs.
 
 ## Colors
 

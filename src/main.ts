@@ -87,7 +87,29 @@ const chart = createYearChart({ a: seriesA, b: seriesB, dayIndex: state.dayIndex
 const dataTable = createDataTable(seriesA, seriesB);
 const readout = createDayReadout();
 
-app.append(tiltControl.element, chartControls, chart.element, dataTable.element, readout.element);
+// The prose is already in `#app`; the controls and the chart belong above it.
+const dockSentinel = el('div', 'chart-dock');
+app.prepend(
+  tiltControl.element,
+  chartControls,
+  dockSentinel,
+  chart.element,
+  dataTable.element,
+  readout.element,
+);
+
+// A stuck element is not a state CSS can select on, so the gap above the chart is watched
+// instead. The two edges of that gap are read separately: the chart docks once the gap is gone
+// from the top of the viewport and undocks once all of it is back, which leaves a band of scroll
+// positions where the state simply holds (docs/design-direction.md §5.2).
+new IntersectionObserver(
+  ([entry]) => {
+    if (!entry) return;
+    if (entry.boundingClientRect.bottom <= 0) chart.setDocked(true);
+    else if (entry.boundingClientRect.top >= 0) chart.setDocked(false);
+  },
+  { threshold: [0, 1] },
+).observe(dockSentinel);
 
 function seriesKey(sampleStep: number): string {
   return [state.tiltDeg, state.cityAId, state.cityBId, state.clockMode, sampleStep].join('|');

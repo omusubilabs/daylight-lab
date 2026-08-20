@@ -11,14 +11,28 @@
 
 const MINUTES_PER_DAY = 1440;
 
+export interface Gutter {
+  readonly left: number;
+  readonly top: number;
+  readonly right: number;
+  readonly bottom: number;
+}
+
 /** Room for the hour labels on the left, the month initials below, and half a line above. */
-const GUTTER = { left: 54, top: 14, right: 12, bottom: 28 } as const;
+export const AXIS_GUTTER: Gutter = { left: 54, top: 14, right: 12, bottom: 28 };
+
+/**
+ * Docked, the chart drops its axis labels (docs/design-direction.md §5.2), so the plot takes the
+ * whole frame. The one pixel left over is for the frame border, which the svg viewport would
+ * otherwise clip in half.
+ */
+export const DOCKED_GUTTER: Gutter = { left: 1, top: 1, right: 1, bottom: 1 };
 
 /** What the chart draws at before it has been measured, and the desktop size in practice. */
 export const DEFAULT_FRAME = { width: 1100, height: 420 } as const;
 
-/** Below this the axis would eat the plot; a chart this small is off-spec anyway. */
-const MIN_PLOT = { width: 120, height: 120 } as const;
+/** A floor, so that a box of any size still yields a plot rectangle with area in it. */
+const MIN_PLOT = { width: 60, height: 60 } as const;
 
 export const PLOT_VIEW = { width: 1000, height: MINUTES_PER_DAY } as const;
 
@@ -44,14 +58,18 @@ export interface ChartLayout {
   };
 }
 
-export function chartLayout(width: number, height: number): ChartLayout {
-  const frameWidth = Math.max(width, GUTTER.left + GUTTER.right + MIN_PLOT.width);
-  const frameHeight = Math.max(height, GUTTER.top + GUTTER.bottom + MIN_PLOT.height);
+export function chartLayout(
+  width: number,
+  height: number,
+  gutter: Gutter = AXIS_GUTTER,
+): ChartLayout {
+  const frameWidth = Math.max(width, gutter.left + gutter.right + MIN_PLOT.width);
+  const frameHeight = Math.max(height, gutter.top + gutter.bottom + MIN_PLOT.height);
   const plot: Rect = {
-    x: GUTTER.left,
-    y: GUTTER.top,
-    width: frameWidth - GUTTER.left - GUTTER.right,
-    height: frameHeight - GUTTER.top - GUTTER.bottom,
+    x: gutter.left,
+    y: gutter.top,
+    width: frameWidth - gutter.left - gutter.right,
+    height: frameHeight - gutter.top - gutter.bottom,
   };
 
   return {

@@ -52,6 +52,10 @@ body {
   font-family: var(--font-sans);
   font-size: 1rem;
   line-height: 1.6;
+  /* The chart shortens as it docks, and scroll anchoring answers that by moving the scroll
+     position — which moves the mark the dock is measured from, which undocks the chart, which
+     moves the scroll back. Left on, the two flip against each other every frame. */
+  overflow-anchor: none;
 }
 
 .page {
@@ -109,9 +113,29 @@ body {
 }
 
 /* Year chart (docs/ui-spec.md). Axis text lives in the frame's coordinates; only the plot is
-   stretched, by a nested svg with preserveAspectRatio="none". */
+   stretched, by a nested svg with preserveAspectRatio="none". The figure sticks to the top of the
+   viewport, so the chart is still on screen while the prose about it is read, and shortens once
+   it gets there (docs/design-direction.md §5.2).
+
+   Nothing in CSS can select a stuck element, so the dock is measured from the gap above the
+   chart: its lower edge leaves the top of the viewport at the moment the chart reaches it, and
+   its upper edge is what brings the chart back, so a scroll position on the boundary cannot flip
+   between the two. */
+.chart-dock {
+  height: 1.5rem;
+  margin-top: 0.5rem;
+}
+
 .chart {
-  margin: 2rem 0 0;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0;
+  background: var(--bg);
+}
+
+.chart--docked {
+  border-bottom: 1px solid var(--border);
 }
 
 /* A fixed pixel height, not an aspect ratio: the chart reads the box back and matches its
@@ -120,6 +144,11 @@ body {
   display: block;
   width: 100%;
   height: 420px;
+  transition: height 220ms ease;
+}
+
+.chart--docked .chart__svg {
+  height: 150px;
 }
 
 .chart__plot {
@@ -187,15 +216,30 @@ body {
   letter-spacing: 0.08em;
 }
 
+/* Collapsing a row from 1fr to 0fr is how the legend's own height is animated away without the
+   stylesheet having to know what that height is. */
 .chart-legend-wrap {
-  margin-top: 0.75rem;
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 220ms ease;
+}
+
+.chart--docked .chart-legend-wrap {
+  grid-template-rows: 0fr;
+}
+
+/* The gap above the legend is the list's own margin, not this box's padding: padding would
+   survive the zeroed row and hold the collapsed legend open. */
+.chart-legend__body {
+  min-height: 0;
+  overflow: hidden;
 }
 
 .chart-legend {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem 1.1rem;
-  margin: 0;
+  margin: 0.75rem 0 0;
   padding: 0;
   list-style: none;
   font-size: 0.875rem;
@@ -726,6 +770,10 @@ a {
 @media (max-width: 700px) {
   .chart__svg {
     height: 320px;
+  }
+
+  .chart--docked .chart__svg {
+    height: 110px;
   }
 
   .tilt {

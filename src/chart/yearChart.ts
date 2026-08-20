@@ -3,7 +3,10 @@ import type { ThresholdName } from '../lib/solar/index.ts';
 import type { YearSeries } from '../lib/year/index.ts';
 import { el, svgEl } from '../ui/dom.ts';
 import {
+  AXIS_GUTTER,
+  DEFAULT_FRAME,
   DEFAULT_LAYOUT,
+  DOCKED_GUTTER,
   PLOT_VIEW,
   bandPath,
   chartLayout,
@@ -40,6 +43,8 @@ export interface YearChart {
   update(data: ChartData): void;
   /** Scrubbing moves only this, so a pointer drag never rebuilds a year of path strings. */
   setCursor(dayIndex: number): void;
+  /** Stuck to the top of the viewport: short, and without its axis or legend (§5.2). */
+  setDocked(docked: boolean): void;
 }
 
 function bandPoints(series: YearSeries, threshold: ThresholdName): string {
@@ -169,6 +174,8 @@ export function createYearChart(initial: ChartData): YearChart {
   const dayCount = initial.a.dayCount;
 
   let layout = DEFAULT_LAYOUT;
+  let box: { width: number; height: number } = { ...DEFAULT_FRAME };
+  let docked = false;
 
   const frame = svgEl('svg', { class: 'chart__svg', role: 'img' });
 
@@ -226,8 +233,12 @@ export function createYearChart(initial: ChartData): YearChart {
 
   const { element: list, overlayLabel } = legendList();
   const caption = el('p', 'chart-legend__caption');
+  // Two boxes, because the legend collapses by animating a single grid row to zero, and a grid
+  // row can only hold one child without the two of them overlapping.
+  const legendBody = el('div', 'chart-legend__body');
+  legendBody.append(list, caption);
   const legend = el('div', 'chart-legend-wrap');
-  legend.append(list, caption);
+  legend.append(legendBody);
 
   const figure = el('figure', 'chart');
   figure.append(stage, legend);
@@ -247,23 +258,37 @@ export function createYearChart(initial: ChartData): YearChart {
     scrubSurface.style.width = `${layout.inset.width * 100}%`;
     scrubSurface.style.height = `${layout.inset.height * 100}%`;
 
-    fillAxis(axis, layout, dayCount, ticks);
+    if (docked) axis.replaceChildren();
+    else fillAxis(axis, layout, dayCount, ticks);
   };
 
-  const setLayout = (width: number, height: number): void => {
-    const next = chartLayout(width, height);
-    if (next.width === layout.width && next.height === layout.height) return;
-    layout = next;
+  const relayout = (): void => {
+    layout = chartLayout(box.width, box.height, docked ? DOCKED_GUTTER : AXIS_GUTTER);
     applyLayout();
+  };
+
+  const setBox = (width: number, height: number): void => {
+    if (width === box.width && height === box.height) return;
+    box = { width, height };
+    relayout();
   };
 
   // The frame's units are CSS pixels, so the chart has to be told how large it was actually
   // drawn. Its own box is what CSS sizes, and nothing here can change that box, so this cannot
   // feed back on itself.
   new ResizeObserver((entries) => {
-    const box = entries[entries.length - 1]?.contentRect;
-    if (box && box.width > 0) setLayout(box.width, box.height);
+    const measured = entries[entries.length - 1]?.contentRect;
+    if (measured && measured.width > 0) setBox(measured.width, measured.height);
   }).observe(stage);
+
+  // The ResizeObserver reports the new height frame by frame as CSS animates it, but the gutter
+  // has to change at once, or the axis keeps its room in a chart that no longer labels it.
+  const setDocked = (next: boolean): void => {
+    if (next === docked) return;
+    docked = next;
+    figure.classList.toggle('chart--docked', docked);
+    relayout();
+  };
 
   const setCursor = (dayIndex: number): void => {
     const x = plotViewX(dayIndex, dayCount).toFixed(1);
@@ -289,5 +314,5 @@ export function createYearChart(initial: ChartData): YearChart {
 
   applyLayout();
   update(initial);
-  return { element: figure, scrubSurface, update, setCursor };
+  return { element: figure, scrubSurface, update, setCursor, setDocked };
 }
