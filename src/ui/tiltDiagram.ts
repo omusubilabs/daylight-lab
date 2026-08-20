@@ -142,7 +142,16 @@ export function createTiltDiagram(options: TiltDiagramOptions): TiltDiagram {
   const axis = line('diagram__axis', axisSegment(0));
   const markA = cityMark('a');
   const markB = cityMark('b');
-  picture.append(arc, axis, markA.halo, markB.halo, markA.chord, markB.chord, markA.label, markB.label);
+  picture.append(
+    arc,
+    axis,
+    markA.halo,
+    markB.halo,
+    markA.chord,
+    markB.chord,
+    markA.label,
+    markB.label,
+  );
 
   // The primary control (design-direction §5.6), so it goes on top of everything else it might
   // otherwise sit under.
