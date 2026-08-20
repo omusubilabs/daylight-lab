@@ -29,7 +29,11 @@ Single column, max width 1100px, centered. Order top to bottom:
    hovering or focusing one previews that column in the chart, activating it scrubs to that date
    (`docs/design-direction.md` §5.4). "No tilt (0°)" in the first section and "Solar time" in the
    second are set controls: buttons that call the same handlers as the tilt-control presets and
-   the clock-mode toggle, not separate state (`docs/design-direction.md` §5.5).
+   the clock-mode toggle, not separate state (`docs/design-direction.md` §5.5). Their figures are
+   readouts, not typed-in numbers: every number that is a result of the current state recomputes
+   with the tilt and the clock mode, and three claims that would otherwise invert past 28.5° are
+   written to hold at any tilt (`docs/design-direction.md` §5.7). Sentences that name the state
+   they describe — "Press **No tilt (0°)** ... 12h 14m" — and the city names stay fixed.
 7. **Methods & limits** — collapsible; states the simplifications from `docs/solar-math.md` §7.
 8. **Footer** — Omusubi Labs Experiments, link back to the experiments index, source link.
 
