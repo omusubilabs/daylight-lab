@@ -46,10 +46,6 @@ Uses the NOAA solar position formulation, accurate to roughly a minute for sunri
 mid-latitudes. Changing the axial tilt away from 23.44° produces a teaching model, not a
 physically self-consistent alternate Earth — see `docs/solar-math.md` §7.
 
-## Initial commit checklist
+## License
 
-- [ ] `CLAUDE.md`, `README.md`, `docs/**`, `.claude/skills/solar-verify/SKILL.md`
-- [ ] `wrangler.jsonc`, `package.json`, `tsconfig.json` (strict), `vitest.config.ts`, `.gitignore`
-- [ ] `.editorconfig` and a formatter config, so Claude Code's output does not churn the diff
-- [ ] Empty `src/` and `test/` with a `.gitkeep`
-- [ ] No source code — M1 onward is Claude Code's work
+MIT — see [LICENSE](LICENSE).
