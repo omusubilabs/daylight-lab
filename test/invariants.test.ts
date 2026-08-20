@@ -11,32 +11,13 @@ import {
   utcMidnightMs,
 } from '../src/lib/solar/index.ts';
 import type { DayQuery } from '../src/lib/solar/index.ts';
+import { CITIES, cityById } from '../src/data/cities.ts';
+import type { City } from '../src/data/cities.ts';
+import { localMinutesSinceMidnight } from '../src/lib/time/index.ts';
 
-interface TestCity {
-  readonly name: string;
-  readonly latitudeDeg: number;
-  readonly longitudeDeg: number;
-}
-
-// Coordinates live here rather than in src/data until M2 adds the curated city list.
-const CITIES: readonly TestCity[] = [
-  { name: 'Singapore', latitudeDeg: 1.3521, longitudeDeg: 103.8198 },
-  { name: 'Nairobi', latitudeDeg: -1.2921, longitudeDeg: 36.8219 },
-  { name: 'Naha', latitudeDeg: 26.2124, longitudeDeg: 127.6809 },
-  { name: 'Sydney', latitudeDeg: -33.8688, longitudeDeg: 151.2093 },
-  { name: 'Tokyo', latitudeDeg: 35.6762, longitudeDeg: 139.6503 },
-  { name: 'Niigata', latitudeDeg: 37.9026, longitudeDeg: 139.0236 },
-  { name: 'Ushuaia', latitudeDeg: -54.8019, longitudeDeg: -68.303 },
-  { name: 'Helsinki', latitudeDeg: 60.1699, longitudeDeg: 24.9384 },
-  { name: 'Anchorage', latitudeDeg: 61.2181, longitudeDeg: -149.9003 },
-  { name: 'Tampere', latitudeDeg: 61.4978, longitudeDeg: 23.761 },
-  { name: 'Reykjavík', latitudeDeg: 64.1466, longitudeDeg: -21.9426 },
-  { name: 'Tromsø', latitudeDeg: 69.6492, longitudeDeg: 18.9553 },
-];
-
-const TAMPERE = CITIES.find((c) => c.name === 'Tampere')!;
-const NIIGATA = CITIES.find((c) => c.name === 'Niigata')!;
-const SYDNEY = CITIES.find((c) => c.name === 'Sydney')!;
+const TAMPERE = cityById('tampere')!;
+const NIIGATA = cityById('niigata')!;
+const SYDNEY = cityById('sydney')!;
 
 const MARCH_EQUINOX = utcMidnightMs(2026, 3, 20);
 const JUNE_SOLSTICE = utcMidnightMs(2026, 6, 21);
@@ -45,11 +26,14 @@ const DECEMBER_SOLSTICE = utcMidnightMs(2026, 12, 21);
 
 const YEAR_START = utcMidnightMs(2026, 1, 1);
 
-function query(city: TestCity, midnightMs: number, obliquityDeg: number): DayQuery {
+// §8b.3 sweeps synthetic latitudes, so this takes coordinates rather than a whole `City`.
+type Site = Pick<City, 'latitudeDeg' | 'longitudeDeg'>;
+
+function query(site: Site, midnightMs: number, obliquityDeg: number): DayQuery {
   return {
     utcMidnightMs: midnightMs,
-    latitudeDeg: city.latitudeDeg,
-    longitudeDeg: city.longitudeDeg,
+    latitudeDeg: site.latitudeDeg,
+    longitudeDeg: site.longitudeDeg,
     obliquityDeg,
   };
 }
@@ -155,20 +139,12 @@ describe('§8b.6 Tampere white nights', () => {
   });
 });
 
-// §8b.7. Intl is allowed here — the ban in CLAUDE.md rule 3 covers src/lib/solar, not its tests.
+// §8b.7 runs end to end: curated city data, the solar core, and the presentation boundary.
 describe('§8b.7 Niigata solar noon', () => {
   it('falls between 11:35 and 11:55 Japan time on the equinoxes', () => {
-    const format = new Intl.DateTimeFormat('en-GB', {
-      timeZone: 'Asia/Tokyo',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
-
     for (const midnightMs of [MARCH_EQUINOX, SEPTEMBER_EQUINOX]) {
       const day = dayEvents(query(NIIGATA, midnightMs, EARTH_OBLIQUITY_DEG));
-      const [hours, minutes] = format.format(new Date(day.solarNoonUtcMs)).split(':').map(Number);
-      const localMinutes = hours! * 60 + minutes!;
+      const localMinutes = localMinutesSinceMidnight(day.solarNoonUtcMs, NIIGATA.timeZone);
 
       expect(localMinutes).toBeGreaterThanOrEqual(11 * 60 + 35);
       expect(localMinutes).toBeLessThanOrEqual(11 * 60 + 55);
@@ -179,7 +155,7 @@ describe('§8b.7 Niigata solar noon', () => {
 describe('§8b.8 the hemispheres move in opposite directions', () => {
   it('lengthens Tampere and shortens Sydney from the March equinox to the June solstice', () => {
     const days = Math.round((JUNE_SOLSTICE - MARCH_EQUINOX) / MS_PER_DAY);
-    const lengthOn = (city: TestCity, index: number) =>
+    const lengthOn = (city: City, index: number) =>
       dayEvents(query(city, MARCH_EQUINOX + index * MS_PER_DAY, EARTH_OBLIQUITY_DEG))
         .minutesAboveZenith;
 
