@@ -7,6 +7,19 @@
   --text-muted: #9aa8c4;
   --accent: #f4d58d;
 
+  /* One hue progression from night to day: the ramp reads as amount of light, not as categories
+     (docs/ui-spec.md). */
+  --band-night: #080d1c;
+  --band-astronomical: #16224b;
+  --band-nautical: #2b3874;
+  --band-civil: #6d63a6;
+  --band-day: #f6e6ad;
+
+  --chart-rule: rgba(232, 237, 247, 0.16);
+  --chart-frame: #2c3a5c;
+  --overlay: #ff5c7a;
+  --overlay-halo: rgba(8, 13, 28, 0.55);
+
   --page-max: 1100px;
   --gap: 1.5rem;
 
@@ -88,4 +101,145 @@ body {
   .page {
     padding: 1.75rem 1rem 3rem;
   }
+}
+
+/* Year chart (docs/ui-spec.md). Axis text lives in the frame's coordinates; only the plot is
+   stretched, by a nested svg with preserveAspectRatio="none". */
+.chart {
+  margin: 2rem 0 0;
+}
+
+.chart__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.chart__plot {
+  overflow: hidden;
+}
+
+.chart__band--night {
+  fill: var(--band-night);
+}
+
+.chart__band--astronomical {
+  fill: var(--band-astronomical);
+}
+
+.chart__band--nautical {
+  fill: var(--band-nautical);
+}
+
+.chart__band--civil {
+  fill: var(--band-civil);
+}
+
+.chart__band--sunrise {
+  fill: var(--band-day);
+}
+
+.chart__rules line {
+  stroke: var(--chart-rule);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart__overlay,
+.chart__overlay-halo {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart__overlay-halo {
+  stroke: var(--overlay-halo);
+  stroke-width: 4.5;
+}
+
+.chart__overlay {
+  stroke: var(--overlay);
+  stroke-width: 2;
+}
+
+.chart__frame {
+  fill: none;
+  stroke: var(--chart-frame);
+  stroke-width: 1;
+}
+
+.chart__tick {
+  fill: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.chart__tick--month {
+  font-size: 14px;
+  letter-spacing: 0.08em;
+}
+
+.chart-legend-wrap {
+  margin-top: 0.75rem;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.875rem;
+}
+
+.chart-legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.chart-legend__swatch {
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 1px solid var(--chart-frame);
+  border-radius: 3px;
+}
+
+.swatch--night {
+  background: var(--band-night);
+}
+
+.swatch--astronomical {
+  background: var(--band-astronomical);
+}
+
+.swatch--nautical {
+  background: var(--band-nautical);
+}
+
+.swatch--civil {
+  background: var(--band-civil);
+}
+
+.swatch--sunrise {
+  background: var(--band-day);
+}
+
+.swatch--overlay {
+  border-color: var(--overlay);
+  background: linear-gradient(
+    to bottom,
+    transparent 40%,
+    var(--overlay) 40%,
+    var(--overlay) 60%,
+    transparent 60%
+  );
+}
+
+.chart-legend__caption {
+  margin: 0.6rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.875rem;
 }
