@@ -10,6 +10,7 @@
     "dev": "vite",
     "test": "vitest run",
     "dump-year": "node scripts/dump-year.ts",
+    "fixture-worksheet": "node scripts/fixture-worksheet.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
     "build": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json && vite build",
     "preview": "vite preview",

@@ -33,7 +33,8 @@ docs/
 src/lib/solar/                     pure math, no DOM, fully unit tested
 src/data/cities.ts                 curated city list with IANA zones
 scripts/dump-year.ts               debugging tool: CSV dump of a full year
-test/fixtures/noaa-golden.json     external ground truth — read-only
+scripts/fixture-worksheet.ts       emits the blank sheet for the NOAA transcription
+test/fixtures/noaa-golden.json     external ground truth — read-only, written by hand
 ```
 
 ## Accuracy

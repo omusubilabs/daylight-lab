@@ -65,7 +65,16 @@ believe is wrong and why. A human regenerates fixtures from NOAA; Claude Code do
 
 ## Regenerating fixtures (human-only, documented here for reference)
 
-Open the NOAA Solar Calculator, enter the city's latitude and longitude, select the date, read
-sunrise / solar noon / sunset, and record them as UTC in `test/fixtures/noaa-golden.json` with
-the source URL and retrieval date in the file header. Tolerance recorded per case: 60 seconds
-below 60° latitude, 120 seconds at or above.
+`pnpm fixture-worksheet --format table` prints the cases to collect; `pnpm fixture-worksheet`
+prints the same list as the JSON skeleton to fill in, so redirect it to
+`test/fixtures/noaa-golden.json` and work through the nulls.
+
+Open the NOAA Solar Calculator (https://gml.noaa.gov/grad/solcalc/), enter the city's latitude
+and longitude, set the time zone to UTC+0 with daylight saving off, select the date, and record
+sunrise / solar noon / sunset as the UTC clock NOAA shows. East of Greenwich sunrise falls on the
+previous UTC date; record the clock as displayed and let the harness resolve the day. Fill in
+`retrieved` with the date of collection. Tolerance per case: 60 seconds below 60° latitude, 120
+seconds at or above — NOAA displays whole minutes, which already spends about 30 seconds of that.
+
+`test/golden.test.ts` skips itself while the file is absent, and fails loudly on a file that is
+present but unfilled, so an empty fixture cannot unblock M2 by accident.
