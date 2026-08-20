@@ -3,6 +3,8 @@ export interface City {
   /** English name, as rendered in the city selects. */
   readonly name: string;
   readonly country: string;
+  /** The `<optgroup>` the city selects file it under (docs/ui-spec.md). */
+  readonly region: string;
   readonly latitudeDeg: number;
   /** Positive east. */
   readonly longitudeDeg: number;
@@ -18,6 +20,7 @@ export const CITIES: readonly City[] = [
     id: 'tromso',
     name: 'Tromsø',
     country: 'Norway',
+    region: 'Nordic and Arctic',
     latitudeDeg: 69.6492,
     longitudeDeg: 18.9553,
     timeZone: 'Europe/Oslo',
@@ -27,6 +30,7 @@ export const CITIES: readonly City[] = [
     id: 'reykjavik',
     name: 'Reykjavík',
     country: 'Iceland',
+    region: 'Nordic and Arctic',
     latitudeDeg: 64.1466,
     longitudeDeg: -21.9426,
     timeZone: 'Atlantic/Reykjavik',
@@ -36,6 +40,7 @@ export const CITIES: readonly City[] = [
     id: 'tampere',
     name: 'Tampere',
     country: 'Finland',
+    region: 'Nordic and Arctic',
     latitudeDeg: 61.4978,
     longitudeDeg: 23.761,
     timeZone: 'Europe/Helsinki',
@@ -45,6 +50,7 @@ export const CITIES: readonly City[] = [
     id: 'anchorage',
     name: 'Anchorage',
     country: 'United States',
+    region: 'North America',
     latitudeDeg: 61.2181,
     longitudeDeg: -149.9003,
     timeZone: 'America/Anchorage',
@@ -54,6 +60,7 @@ export const CITIES: readonly City[] = [
     id: 'helsinki',
     name: 'Helsinki',
     country: 'Finland',
+    region: 'Nordic and Arctic',
     latitudeDeg: 60.1699,
     longitudeDeg: 24.9384,
     timeZone: 'Europe/Helsinki',
@@ -63,6 +70,7 @@ export const CITIES: readonly City[] = [
     id: 'niigata',
     name: 'Niigata',
     country: 'Japan',
+    region: 'East Asia',
     latitudeDeg: 37.9026,
     longitudeDeg: 139.0236,
     timeZone: 'Asia/Tokyo',
@@ -72,6 +80,7 @@ export const CITIES: readonly City[] = [
     id: 'tokyo',
     name: 'Tokyo',
     country: 'Japan',
+    region: 'East Asia',
     latitudeDeg: 35.6762,
     longitudeDeg: 139.6503,
     timeZone: 'Asia/Tokyo',
@@ -81,6 +90,7 @@ export const CITIES: readonly City[] = [
     id: 'naha',
     name: 'Naha',
     country: 'Japan',
+    region: 'East Asia',
     latitudeDeg: 26.2124,
     longitudeDeg: 127.6809,
     timeZone: 'Asia/Tokyo',
@@ -90,6 +100,7 @@ export const CITIES: readonly City[] = [
     id: 'singapore',
     name: 'Singapore',
     country: 'Singapore',
+    region: 'Equator',
     latitudeDeg: 1.3521,
     longitudeDeg: 103.8198,
     timeZone: 'Asia/Singapore',
@@ -99,6 +110,7 @@ export const CITIES: readonly City[] = [
     id: 'nairobi',
     name: 'Nairobi',
     country: 'Kenya',
+    region: 'Equator',
     latitudeDeg: -1.2921,
     longitudeDeg: 36.8219,
     timeZone: 'Africa/Nairobi',
@@ -108,6 +120,7 @@ export const CITIES: readonly City[] = [
     id: 'sydney',
     name: 'Sydney',
     country: 'Australia',
+    region: 'Southern hemisphere',
     latitudeDeg: -33.8688,
     longitudeDeg: 151.2093,
     timeZone: 'Australia/Sydney',
@@ -117,6 +130,7 @@ export const CITIES: readonly City[] = [
     id: 'ushuaia',
     name: 'Ushuaia',
     country: 'Argentina',
+    region: 'Southern hemisphere',
     latitudeDeg: -54.8019,
     longitudeDeg: -68.303,
     timeZone: 'America/Argentina/Ushuaia',

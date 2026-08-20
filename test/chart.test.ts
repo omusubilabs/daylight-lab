@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   PLOT_VIEW,
   bandPath,
+  dayIndexAtFraction,
   hourRules,
   linePath,
   monthTicks,
@@ -194,6 +195,60 @@ describe('the rendered year', () => {
     expect(subpaths(linePath(toLinePoints(series))).length).toBeGreaterThan(1);
     for (const part of subpaths(bandPath(toBandPoints(series)))) {
       expect(part.endsWith('Z')).toBe(true);
+    }
+  });
+});
+
+describe('dropping resolution while the slider moves', () => {
+  const full = yearSeries(city('tampere'), EARTH_OBLIQUITY_DEG, YEAR);
+  const draft = yearSeries(city('tampere'), EARTH_OBLIQUITY_DEG, YEAR, { sampleStep: 2 });
+
+  it('keeps the first and last day, so the chart never rescales mid-drag', () => {
+    expect(draft.dayCount).toBe(full.dayCount);
+    expect(draft.days.length).toBeLessThan(full.days.length);
+    expect(draft.days.at(0)?.index).toBe(0);
+    expect(draft.days.at(-1)?.index).toBe(full.dayCount - 1);
+  });
+
+  it('spans exactly the same plot width as the full-resolution year', () => {
+    const extent = (series: YearSeries): number[] => {
+      const xs = pointsOf(bandPath(toBandPoints(series))).map((point) => point.x);
+      return [Math.min(...xs), Math.max(...xs)];
+    };
+    expect(extent(draft)).toEqual(extent(full));
+  });
+
+  it('puts every sampled day at the x its own day index would have had', () => {
+    draft.days.forEach((day, position) => {
+      expect(plotViewX(position, draft.days.length), `day ${day.index}`).toBeCloseTo(
+        plotViewX(day.index, full.dayCount),
+        6,
+      );
+    });
+  });
+
+  it('still breaks Tampere into three closed bands across the two clock changes', () => {
+    const parts = subpaths(bandPath(toBandPoints(draft)));
+    expect(parts).toHaveLength(3);
+    for (const part of parts) expect(part.endsWith('Z')).toBe(true);
+  });
+});
+
+describe('finding the day under the pointer', () => {
+  it('maps the plot edges to the first and last day', () => {
+    expect(dayIndexAtFraction(0, 365)).toBe(0);
+    expect(dayIndexAtFraction(1, 365)).toBe(364);
+    expect(dayIndexAtFraction(0.5, 365)).toBe(182);
+  });
+
+  it('clamps a pointer that has left the plot instead of running off the year', () => {
+    expect(dayIndexAtFraction(-3, 365)).toBe(0);
+    expect(dayIndexAtFraction(4, 365)).toBe(364);
+  });
+
+  it('inverts plotViewX for every day of the year', () => {
+    for (let index = 0; index < 365; index++) {
+      expect(dayIndexAtFraction(plotViewX(index, 365) / PLOT_VIEW.width, 365)).toBe(index);
     }
   });
 });

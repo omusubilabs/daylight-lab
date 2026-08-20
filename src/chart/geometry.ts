@@ -30,6 +30,21 @@ export function frameY(minutes: number): number {
   return PLOT.y + (minutes / MINUTES_PER_DAY) * PLOT.height;
 }
 
+/** The plot rectangle as fractions of the frame, so an overlay can sit exactly on top of it. */
+export const PLOT_INSET = {
+  left: PLOT.x / FRAME.width,
+  top: PLOT.y / FRAME.height,
+  width: PLOT.width / FRAME.width,
+  height: PLOT.height / FRAME.height,
+} as const;
+
+/** The inverse of `plotViewX`: which day the pointer is over, 0 at the left edge and 1 at the right. */
+export function dayIndexAtFraction(fraction: number, dayCount: number): number {
+  if (dayCount < 2) return 0;
+  const index = Math.round(fraction * (dayCount - 1));
+  return Math.min(Math.max(index, 0), dayCount - 1);
+}
+
 export interface BandPoint {
   readonly morning: number;
   readonly evening: number;
