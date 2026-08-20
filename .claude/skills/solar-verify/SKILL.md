@@ -16,9 +16,9 @@ Record the current baseline so you can diff behavior, not just tests:
 
 ```bash
 pnpm test 2>&1 | tail -20
-pnpm tsx scripts/dump-year.ts --city tampere --tilt 23.44 > /tmp/before-tampere.csv
-pnpm tsx scripts/dump-year.ts --city tampere --tilt 40    > /tmp/before-tampere-40.csv
-pnpm tsx scripts/dump-year.ts --city niigata --tilt 0     > /tmp/before-niigata-0.csv
+pnpm dump-year --city tampere --tilt 23.44 > /tmp/before-tampere.csv
+pnpm dump-year --city tampere --tilt 40    > /tmp/before-tampere-40.csv
+pnpm dump-year --city niigata --tilt 0     > /tmp/before-niigata-0.csv
 ```
 
 If `scripts/dump-year.ts` does not exist yet, create it. It prints one CSV row per day: date,
@@ -34,7 +34,7 @@ UTC. It is a debugging tool, not shipped code, and belongs in `scripts/`.
 3. Sweep the tilt parameter, not just the default:
    ```bash
    for t in 0 5 10 23.44 30 40 45; do
-     pnpm tsx scripts/dump-year.ts --city tampere --tilt $t | md5sum
+     pnpm -s dump-year --city tampere --tilt $t | md5sum
    done
    ```
    Seven distinct hashes are expected. Two identical hashes at different tilts means a code path

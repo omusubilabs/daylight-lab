@@ -16,6 +16,9 @@
     "exactOptionalPropertyTypes": true,
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
+    // Imports carry the .ts extension so `node scripts/dump-year.ts` can run the solar module
+    // directly, with no bundler and no transpile step.
+    "allowImportingTsExtensions": true,
     "useDefineForClassFields": true,
 
     "noEmit": true,
