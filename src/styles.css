@@ -702,19 +702,13 @@ a {
   margin-bottom: 0;
 }
 
-/* A control named in the prose is set in the face and the warmth of a tilt control, so
-   "No tilt (0°)" reads as a thing to press rather than as emphasis (docs/design-direction.md §5.3). */
-.prose b,
+/* The drag affordance. A parameter of the model can be grabbed; the dashed rule under it is the
+   only thing saying so, since an inline number has no track (§5.3). */
 .prose__slider {
   color: var(--sun);
   font-family: var(--font-mono);
   font-size: 0.9375em;
   font-weight: 400;
-}
-
-/* The drag affordance. A parameter of the model can be grabbed; the dashed rule under it is the
-   only thing saying so, since an inline number has no track (§5.3). */
-.prose__slider {
   font-variant-numeric: tabular-nums;
   text-decoration: underline dashed;
   text-decoration-thickness: 1px;
@@ -751,6 +745,38 @@ a {
 
 .prose__date:hover {
   text-decoration-style: solid;
+}
+
+/* The set affordance (§5.3, §5.5): a pill border rather than an underline, since these are the
+   same buttons as the outer preset row and the segmented control, not a word standing in for one. */
+.prose__set {
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: none;
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: 0.9375em;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+/* Warm: a named tilt is a control over light (§5.1). */
+.prose__set--tilt {
+  color: var(--sun);
+}
+
+.prose__set--tilt:hover {
+  border-color: var(--sun);
+}
+
+/* Cool: clock mode is navigation, not light, even though it shares the pill shape (§5.1). */
+.prose__set--mode {
+  color: var(--ui-accent);
+}
+
+.prose__set--mode:hover {
+  border-color: var(--ui-accent);
 }
 
 /* A result, not a control. It moves with the tilt and takes none of the control's warmth, which

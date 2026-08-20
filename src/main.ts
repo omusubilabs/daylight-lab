@@ -15,6 +15,7 @@ import {
 } from './state/appState.ts';
 import type { AppState } from './state/appState.ts';
 import { formatHash, parseHash } from './state/hash.ts';
+import type { ClockMode } from './lib/time/index.ts';
 import { createCityControls } from './ui/cityControls.ts';
 import { createClockToggle } from './ui/clockToggle.ts';
 import { createDataTable } from './ui/dataTable.ts';
@@ -54,9 +55,19 @@ function setTilt(tiltDeg: number): void {
   apply({ ...state, tiltDeg }, 'defer', true);
 }
 
+/** A named preset, wherever it is pressed from (docs/design-direction.md §5.5). */
+function setPreset(tiltDeg: number): void {
+  animateTiltTo(tiltDeg);
+}
+
+/** A named clock mode, wherever it is pressed from (docs/design-direction.md §5.5). */
+function setClockMode(clockMode: ClockMode): void {
+  apply({ ...state, clockMode }, 'replace', false);
+}
+
 const tiltControl = createTiltControl({
   onInput: setTilt,
-  onPreset: (tiltDeg) => animateTiltTo(tiltDeg),
+  onPreset: setPreset,
   onCityReset: () =>
     apply(
       { ...state, cityAId: DEFAULT_STATE.cityAId, cityBId: DEFAULT_STATE.cityBId },
@@ -73,6 +84,8 @@ const inlineControls = createInlineControls(app, {
   onInput: setTilt,
   onDayPreview: previewDay,
   onDayActivate: scrubTo,
+  onPreset: setPreset,
+  onClockMode: setClockMode,
 });
 
 const cityControls = createCityControls({
@@ -80,7 +93,7 @@ const cityControls = createCityControls({
 });
 
 const clockToggle = createClockToggle({
-  onChange: (clockMode) => apply({ ...state, clockMode }, 'replace', false),
+  onChange: setClockMode,
 });
 
 const chartControls = el('div', 'chart-controls');

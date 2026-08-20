@@ -20,6 +20,12 @@ export interface InlineControlsOptions {
   onDayPreview(dayIndex: number | null): void;
   /** Click or keyboard-activate a date button (docs/design-direction.md §5.4). */
   onDayActivate(dayIndex: number): void;
+  /** Click a named tilt preset in the prose — the same handler the outer preset buttons call
+   * (docs/design-direction.md §5.5). */
+  onPreset(tiltDeg: number): void;
+  /** Click a named clock-mode button in the prose — the same handler the segmented control calls
+   * (docs/design-direction.md §5.5). */
+  onClockMode(mode: ClockMode): void;
 }
 
 export interface InlineControls {
@@ -37,6 +43,10 @@ export function createInlineControls(
 ): InlineControls {
   const sliders = [...root.querySelectorAll<HTMLElement>('[data-control="tilt"]')];
   const dateButtons = [...root.querySelectorAll<HTMLButtonElement>('[data-control="date"]')];
+  const presetButtons = [...root.querySelectorAll<HTMLButtonElement>('[data-control="preset"]')];
+  const clockModeButtons = [
+    ...root.querySelectorAll<HTMLButtonElement>('[data-control="clock-mode"]'),
+  ];
   const declinations = [...root.querySelectorAll<HTMLElement>('[data-figure="declination"]')];
   // §5.7: everything else in the prose that recomputes with the tilt, keyed by `data-figure` to
   // the matching property of `ReactiveProse` — one lookup covers a single span and a whole clause
@@ -111,6 +121,22 @@ export function createInlineControls(
     button.addEventListener('focus', () => options.onDayPreview(dayIndex));
     button.addEventListener('blur', () => options.onDayPreview(null));
     button.addEventListener('click', () => options.onDayActivate(dayIndex));
+  }
+
+  // A named tilt, not a position to drag to — same "Set" affordance as the outer preset row, and
+  // the same handler, so pressing it here animates the diagram exactly as pressing it there does.
+  for (const button of presetButtons) {
+    button.classList.add('prose__set', 'prose__set--tilt');
+    const tiltDeg = Number(button.dataset.tilt);
+    button.addEventListener('click', () => options.onPreset(tiltDeg));
+  }
+
+  // Clock mode is navigation/mode, not light, so it takes the cool token (§5.1) even though it
+  // shares the pill-button shape of the tilt presets.
+  for (const button of clockModeButtons) {
+    button.classList.add('prose__set', 'prose__set--mode');
+    const mode = button.dataset.mode as ClockMode;
+    button.addEventListener('click', () => options.onClockMode(mode));
   }
 
   for (const declination of declinations) declination.classList.add('prose__value');
